@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">مركز حبشي للعيون - نظام بيجول (الاستقبال)</title>
+    <link id="bootstrapCss" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+        .top-navbar { background-color: #ffffff; border-bottom: 2px solid #e2e8f0; }
+        .nav-btn { font-weight: bold; border-radius: 8px; margin: 0 4px; font-size: 0.95rem; }
+        .nav-btn.active { background-color: #0f766e !important; color: white !important; }
+        .nav-btn.tab-locked { opacity: 0.45; cursor: not-allowed !important; pointer-events: none; }
+        .patient-card { background: #ffffff; border-right: 5px solid #0f766e; }
+        html[dir="ltr"] .patient-card { border-right: none; border-left: 5px solid #0f766e; }
+        .file-badge { background-color: #fef08a; color: #1e3a8a; font-size: 1.2rem; font-weight: bold; }
+        .attachment-item { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .serial-badge { font-family: monospace; font-size: 0.85rem; font-weight: bold; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; border: 1px solid #bae6fd; }
+        .patient-avatar { width: 65px; height: 65px; object-fit: cover; border-radius: 50%; border: 2px solid #0f766e; background: #e2e8f0; }
+        .avatar-preview-box { width: 100px; height: 100px; border-radius: 12px; border: 2px dashed #94a3b8; object-fit: cover; background: #f8fafc; }
+        .section-header { font-weight: bold; color: #0f766e; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 10px; }
+        .insurance-box { background-color: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 8px; padding: 12px; }
+        
+        .form-locked input, 
+        .form-locked select, 
+        .form-locked textarea {
+            background-color: #f1f5f9 !important;
+            cursor: not-allowed;
+            color: #475569 !important;
+            border-color: #cbd5e1;
+        }
+
+        /* تنسيق كاميرا السكانر */
+        #scannerVideo { width: 100%; height: 220px; object-fit: cover; border-radius: 8px; background: #000; border: 2px solid #0f766e; }
+        #scannerCanvas { display: none; }
+
+        .begol-footer {
+            margin-top: auto;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            padding: 12px 20px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .andy-badge {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printTicketArea, #printTicketArea * { visibility: visible; }
+            #printTicketArea { 
+                position: absolute; left: 0; top: 0; 
+                width: 80mm; 
+                padding: 0; margin: 0;
+                font-family: 'Segoe UI', Tahoma, sans-serif;
+                color: #000;
+            }
+            .print-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+            .print-logo { width: 45px; margin-bottom: 5px; }
+            .queue-box { border: 2px solid #000; text-align: center; padding: 10px; margin: 10px 0; border-radius: 8px; }
+            .queue-box h1 { margin: 0; font-size: 38px; font-weight: 900; }
+            .print-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; border-bottom: 1px dotted #ccc; padding-bottom: 4px;}
+            .print-footer { text-align: center; font-size: 12px; margin-top: 15px; border-top: 2px dashed #000; padding-top: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- البار العلوي -->
+    <nav class="top-navbar py-2 px-4 shadow-sm mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center">
+                <span class="fs-4 me-2 text-success">👁️</span>
+                <div>
+                    <h5 class="m-0 fw-bold text-dark" id="navCenterTitle">مركز حبشي التخصصي للعيون</h5>
+                    <small class="text-success fw-bold" style="font-size: 0.75rem;" id="navSystemName">نظام بيجول (Begol) • قسم الاستقبال</small>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center">
+                <button id="btnTabPatients" class="btn btn-outline-success nav-btn active" onclick="switchTab('patients')">👥 ملفات المرضى والبحث</button>
+                <button id="btnTabServices" class="btn btn-outline-success nav-btn tab-locked" onclick="switchTab('services')" title="يجب اختيار أو حفظ مريض أولاً">🩺 حجز الخدمات والتذاكر 🔒</button>
+                <button id="btnTabAttachments" class="btn btn-outline-success nav-btn tab-locked" onclick="switchTab('attachments')" title="يجب اختيار أو حفظ مريض أولاً">📁 مرفقات وسكانر المريض 🔒</button>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-dark fw-bold px-2 py-1 shadow-sm" onclick="toggleLanguage()" id="btnLangToggle">🌐 English</button>
+                <a id="btnAdminBack" href="/admin.html" class="btn btn-sm btn-outline-dark me-2">⚙️ لوحة الإدارة</a>
+                <span id="lblUserBadge" class="badge bg-light text-dark border p-2">👤 المستخدم: ...</span>
+                <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logout()" id="btnLogout">خروج 🚪</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 flex-grow-1">
+        <!-- كارت المريض الحالي -->
+        <div class="patient-card p-3 shadow-sm rounded mb-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <img id="headerPatientImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' fill='%2394a3b8' viewBox='0 0 16 16'><path d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z'/></svg>" class="patient-avatar" alt="Avatar">
+                <div>
+                    <h4 id="lblCurrentName" class="m-0 fw-bold text-dark">يرجى الضغط على مريض جديد أو البحث عن مريض</h4>
+                    <small id="lblCurrentDetails" class="text-muted">الرقم القومي: -- | الهاتف: --</small>
+                </div>
+            </div>
+            <div class="text-end">
+                <span class="text-muted d-block small" id="lblFileCodeText">رقم الملف / الكود:</span>
+                <span id="lblCurrentCode" class="badge file-badge px-3 py-2 border">--</span>
+            </div>
+        </div>
+
+        <!-- تاب 1: بيانات المريض والبحث -->
+        <div id="tabPatients">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <div class="row g-2 mb-3 p-2 bg-light rounded align-items-center">
+                        <div class="col-md-9">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">🔍</span>
+                                <input type="text" id="txtQuickCodeSearch" class="form-control" autocomplete="off" placeholder="اكتب كود المريض (مثال: 1)، الاسم، أو رقم الهاتف ثم اضغط Enter..." onkeypress="if(event.key==='Enter') executeQuickSearch()">
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button class="btn btn-secondary w-50 fw-bold shadow-sm" onclick="openAdvancedSearchModal()" id="btnSearch">🔎 بحث متقدم</button>
+                            <button class="btn btn-success w-50 fw-bold shadow-sm" onclick="startNewPatientEntry()" id="btnNewTop">➕ مريض جديد</button>
+                        </div>
+                    </div>
+
+                    <!-- حاوية الحقول المقفولة افتراضياً -->
+                    <div id="patientFormContainer" class="form-locked">
+                        <div class="row g-3">
+                            <div class="col-md-10">
+                                <h6 class="section-header" id="secFullName">الاسم بالكامل (مفصص رباعي):</h6>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblAr1">الاسم الأول:*</label>
+                                        <input type="text" id="ar1" class="form-control" autocomplete="off" required disabled>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblAr2">الاسم الثاني:</label>
+                                        <input type="text" id="ar2" class="form-control" autocomplete="off" disabled>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblAr3">الاسم الثالث:</label>
+                                        <input type="text" id="ar3" class="form-control" autocomplete="off" disabled>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblAr4">الاسم الرابع:</label>
+                                        <input type="text" id="ar4" class="form-control" autocomplete="off" disabled>
+                                    </div>
+                                </div>
+
+                                <h6 class="section-header" id="secPersonal">البيانات الشخصية والاتصال:</h6>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblNationalId">الرقم القومي (14 رقم):</label>
+                                        <input type="text" id="nationalId" maxlength="14" class="form-control" autocomplete="off" disabled>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblMobile">رقم المحمول:*</label>
+                                        <input type="text" id="mobile" class="form-control" autocomplete="off" disabled>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small fw-bold" id="lblBirthDate">تاريخ الميلاد:</label>
+                                        <input type="date" id="birthDate" class="form-control" onchange="calcAgeFromBirth()" disabled>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small fw-bold" id="lblAge">السن:</label>
+                                        <input type="number" id="age" class="form-control" placeholder="السن" disabled>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small fw-bold" id="lblGender">النوع:</label>
+                                        <select id="gender" class="form-select" disabled>
+                                            <option value="ذكر" id="optMale">ذكر</option>
+                                            <option value="أنثى" id="optFemale">أنثى</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblGov">المحافظة:</label>
+                                        <input type="text" id="gov" class="form-control" value="القاهرة" disabled>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblDistrict">الحي / المركز:</label>
+                                        <input type="text" id="district" class="form-control" value="عين شمس" disabled>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold" id="lblAddress">العنوان التفصيلي:</label>
+                                        <input type="text" id="address" class="form-control" autocomplete="off" disabled>
+                                    </div>
+                                </div>
+
+                                <h6 class="section-header" id="secInsurance">🏢 بيانات التأمين والتعاقدات:</h6>
+                                <div class="insurance-box mb-3">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold" id="lblInsType">نوع الحساب:</label>
+                                            <select id="insuranceType" class="form-select fw-bold" onchange="toggleInsuranceFields()" disabled>
+                                                <option value="نقدي" id="optCash">نقدي (Cash)</option>
+                                                <option value="تأمين" id="optInsurance">تأمين / تعاقد</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 ins-field" style="display:none;">
+                                            <label class="form-label small fw-bold" id="lblInsCompany">شركة التأمين / الجهة:*</label>
+                                            <select id="insuranceCompany" class="form-select fw-bold" onchange="onInsuranceCompanySelected()" disabled>
+                                                <option value="">جاري التحميل...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2 ins-field" style="display:none;">
+                                            <label class="form-label small fw-bold" id="lblInsCardNo">رقم الكارنيه:</label>
+                                            <input type="text" id="insuranceCardNo" class="form-control" placeholder="رقم الكارنيه" disabled>
+                                        </div>
+                                        <div class="col-md-2 ins-field" style="display:none;">
+                                            <label class="form-label small fw-bold" id="lblInsMemberType">صفة المنتفع:</label>
+                                            <select id="insuranceMemberType" class="form-select" onchange="togglePrimaryHolder()" disabled>
+                                                <option value="عضو أصيل">عضو أصيل (نفسه)</option>
+                                                <option value="زوج / زوجة">زوج / زوجة</option>
+                                                <option value="ابن / ابنة">ابن / ابنة</option>
+                                                <option value="والد / والدة">والد / والدة</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 ins-field" id="divPrimaryHolder" style="display:none;">
+                                            <label class="form-label small fw-bold text-danger">اسم العضو الأصيل:*</label>
+                                            <input type="text" id="insurancePrimaryHolder" class="form-control" placeholder="اسم صاحب الكارنيه" disabled>
+                                        </div>
+                                        <div class="col-md-2 ins-field" style="display:none;">
+                                            <label class="form-label small fw-bold">نسبة التحمل (%):</label>
+                                            <input type="text" id="insuranceCopay" class="form-control fw-bold text-center text-success" placeholder="10%" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h6 class="section-header" id="secNotes">📝 ملاحظات إدارية وطبية:</h6>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-12">
+                                        <textarea id="patientNotes" class="form-control" rows="2" placeholder="اكتب ملاحظات طبية أو إدارية هنا..." disabled></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 text-center border-start ps-3">
+                                <label class="form-label small fw-bold text-success d-block" id="lblPhotoTitle">صورة المريض:</label>
+                                <img id="formPatientPhotoPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%23cbd5e1' viewBox='0 0 16 16'><path d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z'/></svg>" class="avatar-preview-box mb-2" alt="Preview">
+                                <input type="file" id="patientPhotoInput" accept="image/*" class="form-control form-control-sm" onchange="previewPatientPhoto(this)" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- شريط الأزرار -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <button class="btn btn-outline-secondary px-3 py-2 fw-bold" onclick="resetToIdleState()" id="btnResetForm">🔄 إلغاء وتفريغ الشاشة</button>
+                        
+                        <div class="d-flex gap-2">
+                            <button id="btnSaveNew" class="btn btn-success px-4 py-2 fw-bold shadow-sm" onclick="savePatient('CREATE')" style="display: none;">💾 حفظ ملف المريض الجديد</button>
+                            <button id="btnEnableEdit" class="btn btn-warning px-4 py-2 fw-bold text-dark shadow-sm" onclick="enableEditing()" style="display: none;">✏️ طلب تعديل البيانات</button>
+                            <button id="btnSaveUpdate" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" onclick="savePatient('UPDATE')" style="display: none;">💾 حفظ التعديلات</button>
+                            <button id="btnCancelEdit" class="btn btn-outline-danger px-3 py-2 fw-bold" onclick="cancelEditing()" style="display: none;">❌ إلغاء التعديل</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- تاب 2: حجز الخدمات والتذاكر -->
+        <div id="tabServices" style="display: none;">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold text-dark border-bottom pb-2" id="secBookingTitle">بيانات الزيارة والخدمات الطبية:</h5>
+                    
+                    <div class="row g-2 mb-3 align-items-center">
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold" id="lblClinic">العيادة / القسم:*</label>
+                            <select id="cmbClinic" class="form-select fw-bold bg-light" onchange="onClinicChange()">
+                                <option value="عيادة الكشف">عيادة الكشف</option>
+                                <option value="وحدة الفحوصات">وحدة الفحوصات والأشعة</option>
+                                <option value="وحدة الليزر">وحدة الليزر</option>
+                                <option value="وحدة العمليات">وحدة العمليات</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold" id="lblService">نوع الخدمة / الفحص:*</label>
+                            <select id="cmbServiceType" class="form-select fw-bold" onchange="onServiceChange()">
+                                <option value="">-- اختر الخدمة --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2" id="divConsultationType">
+                            <label class="form-label small fw-bold text-success" id="lblVisitTypeDoc">نوع الزيارة:*</label>
+                            <select id="cmbVisitType" class="form-select fw-bold border-success" onchange="calculateFinalPrice()">
+                                <option value="كشف جديد">كشف جديد</option>
+                                <option value="استشارة">استشارة / إعادة (مجاناً)</option>
+                                <option value="عرض تقرير">عرض تقرير / متابعة (مجاناً)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2" id="divEyeScopeContainer" style="display: none;">
+                            <label class="form-label small fw-bold text-success">نطاق الفحص:*</label>
+                            <select id="cmbEyeScope" class="form-select fw-bold" onchange="onEyeScopeChange()">
+                                <option value="single">عين واحدة (Single)</option>
+                                <option value="both">كلتا العينين (Both - OU)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2" id="divEyeSide" style="display: none;">
+                            <label class="form-label small fw-bold text-danger">جهة العين:*</label>
+                            <select id="cmbEyeSide" class="form-select fw-bold border-danger">
+                                <option value="العين اليمنى (OD)">العين اليمنى (OD)</option>
+                                <option value="العين اليسرى (OS)">العين اليسرى (OS)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold" id="lblDoctor">الطبيب المعالج (اختياري):</label>
+                            <select id="cmbDoctorSelectRec" class="form-select fw-bold text-success">
+                                <option value="">-- عيادة عامة --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold" id="lblPrice">السعر (ج.م):</label>
+                            <input type="number" id="txtPrice" class="form-control fw-bold text-success fs-5 text-center p-1" value="0" readonly>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button class="btn btn-success px-4 py-2 fw-bold" onclick="bookService()" id="btnBookTicket">🎫 حفظ الخدمة وقطع التذكرة</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-bold" id="historyCardHeader">
+                    📋 سجل خدمات وزيارات المريض السابقة:
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-striped text-center m-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th id="thQueue">رقم مسلسل</th>
+                                <th id="thClinic">نوع الخدمة / العين</th>
+                                <th id="thDate">تاريخ الزيارة</th>
+                                <th id="thTime">الوقت</th>
+                                <th id="thDoctor">الطبيب المعالج</th>
+                                <th id="thInvoice">رقم الفاتورة</th>
+                                <th id="thCreatedBy">موظف الاستقبال</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr><td colspan="7" class="text-muted py-3">لا توجد زيارات مسجلة لهذا المريض</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- تاب 3: مرفقات المريض والاسكانر المباشر -->
+        <div id="tabAttachments" style="display: none;">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold text-success d-flex justify-content-between align-items-center" id="attCardHeader">
+                            <span>📤 إضافة مرفق من ملف أو التقاط سكانر مباشر</span>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-success active" id="btnModeFile" onclick="toggleUploadMode('file')">📁 ملف عادي</button>
+                                <button type="button" class="btn btn-outline-primary" id="btnModeCam" onclick="toggleUploadMode('cam')">📷 سكانر كاميرا مباشر</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold" id="lblAttTitle">وصف / نوع المرفق:*</label>
+                                <input type="text" id="attTitle" class="form-control form-control-sm" placeholder="مثلاً: صورة بطاقة / تقرير أشعة / فحص خارجي">
+                            </div>
+
+                            <!-- وضع الملف العادي -->
+                            <div id="uploadFileSection" class="mb-3">
+                                <label class="form-label small fw-bold" id="lblAttFile">اختر ملف الفحص / PDF / صورة:*</label>
+                                <input type="file" id="attFile" class="form-control form-control-sm" accept="image/*,application/pdf">
+                            </div>
+
+                            <!-- وضع الكاميرا والسكانر المباشر -->
+                            <div id="uploadCamSection" class="mb-3" style="display: none;">
+                                <label class="form-label small fw-bold text-primary">المعاينة المباشرة من السكانر / الكاميرا:</label>
+                                <video id="scannerVideo" autoplay playsinline></video>
+                                <canvas id="scannerCanvas"></canvas>
+                                <div class="d-flex gap-2 mt-2">
+                                    <button type="button" class="btn btn-sm btn-info text-dark fw-bold w-50" onclick="startScannerCamera()">▶️ تشغيل الكاميرا</button>
+                                    <button type="button" class="btn btn-sm btn-warning text-dark fw-bold w-50" onclick="captureScannerSnapshot()">📸 التقاط صورة السكانر</button>
+                                </div>
+                                <div id="capturePreviewContainer" class="mt-2 text-center" style="display: none;">
+                                    <small class="text-success fw-bold d-block mb-1">تم الالتقاط بنجاح للمستند:</small>
+                                    <img id="capturedImagePreview" src="" style="max-height: 120px; border-radius: 6px; border: 2px solid #16a34a;">
+                                </div>
+                            </div>
+
+                            <button class="btn btn-success w-100 fw-bold py-2 mt-2" onclick="uploadAttachment()" id="btnUploadAtt">💾 حفظ المرفق وتوليد سيريال رسمي بالسحاب</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                            <span id="attListHeader">📁 قائمة مرفقات المريض الرسمية (Supabase)</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="loadAttachments()" id="btnRefreshAtt">🔄 تحديث</button>
+                        </div>
+                        <div class="card-body p-3" id="attachmentsListContainer" style="max-height: 55vh; overflow-y: auto;">
+                            <div class="text-muted text-center py-4">اختر مريضاً أولاً لعرض مرفقاته</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة البحث المتقدم -->
+    <div class="modal fade" id="advancedSearchModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="modalSearchTitle">🔍 البحث المتقدم والذكي عن ملفات المرضى</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3 bg-light">
+                    <div class="card p-3 mb-3 border-0 shadow-sm">
+                        <h6 class="fw-bold text-success border-bottom pb-2 mb-2">1. البحث بالاسم الرباعي المفصص:</h6>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">الاسم الأول:</label>
+                                <input type="text" id="srchAr1" class="form-control form-control-sm" placeholder="مثال: أحمد">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">الاسم الثاني:</label>
+                                <input type="text" id="srchAr2" class="form-control form-control-sm" placeholder="مثال: محمد">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">الاسم الثالث:</label>
+                                <input type="text" id="srchAr3" class="form-control form-control-sm" placeholder="مثال: علي">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">الاسم الرابع (اللقب):</label>
+                                <input type="text" id="srchAr4" class="form-control form-control-sm" placeholder="مثال: إبراهيم">
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-success border-bottom pb-2 mb-2">2. البحث بالاتصال، الرقم القومي، والفترة الزمنية:</h6>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">رقم الهاتف / المحمول:</label>
+                                <input type="text" id="srchMobile" class="form-control form-control-sm" placeholder="01xxxxxxxxx">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">الرقم القومي (14 رقم):</label>
+                                <input type="text" id="srchNationalId" class="form-control form-control-sm" placeholder="رقم البطاقة">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">من تاريخ تسجيل:</label>
+                                <input type="date" id="srchDateFrom" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">إلى تاريخ تسجيل:</label>
+                                <input type="date" id="srchDateTo" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-2 d-flex gap-1">
+                                <button class="btn btn-success btn-sm w-100 fw-bold" onclick="executeAdvancedSearch()">🔍 ابحث الآن</button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearSearchModalInputs()" title="تفريغ الخانات">🔄</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                            <span>📋 نتائج البحث:</span>
+                            <span id="lblSearchResultsCount" class="badge bg-secondary">0 مريض</span>
+                        </div>
+                        <div class="card-body p-0" style="max-height: 45vh; overflow-y: auto;">
+                            <table class="table table-hover table-striped text-center align-middle m-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>كود الملف</th>
+                                        <th>الاسم بالكامل</th>
+                                        <th>المحمول</th>
+                                        <th>الرقم القومي</th>
+                                        <th>تاريخ التسجيل</th>
+                                        <th>إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="searchResultsTableBody">
+                                    <tr><td colspan="6" class="text-muted py-4">أدخل معايير البحث واضغط "ابحث الآن"</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الفوتر الرسمي -->
+    <footer class="begol-footer">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong class="text-dark">👁️ نظام بيجول (Begol Eye System)</strong>
+                <span class="mx-1">•</span>
+                <span>مركز حبشي التخصصي للعيون</span>
+                <span class="mx-1">•</span>
+                <span class="text-muted">جميع الحقوق محفوظة © 2026</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="me-2">تم التطوير والبرمجة بواسطة:</span>
+                <span class="andy-badge">آندي (Andy)</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- تصميم الإيصال / التذكرة الحرارية -->
+    <div id="printTicketArea" style="display:none;">
+        <div class="print-header">
+            <svg class="print-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <h3 style="margin: 0; font-weight: bold; font-size: 18px;">مركز حبشي التخصصي للعيون</h3>
+            <div style="font-size: 12px; margin-top: 3px;" id="ptDateTime">--</div>
+        </div>
+
+        <div class="queue-box">
+            <div style="font-size: 14px; font-weight: bold;">رقم الدور (Queue)</div>
+            <h1 id="ptQueue">--</h1>
+        </div>
+
+        <div class="print-row"><strong>كود المريض:</strong> <span id="ptCode">--</span></div>
+        <div class="print-row"><strong>اسم المريض:</strong> <span id="ptName">--</span></div>
+        <div class="print-row"><strong>نوع الخدمة:</strong> <span id="ptService">--</span></div>
+        <div class="print-row"><strong>الطبيب:</strong> <span id="ptDoctor">--</span></div>
+        <div class="print-row"><strong>رقم الفاتورة:</strong> <span id="ptInvoice">--</span></div>
+        <div class="print-row"><strong>المبلغ (ج.م):</strong> <span id="ptPrice">--</span></div>
+        <div class="print-row"><strong>موظف الاستقبال:</strong> <span id="ptUser">--</span></div>
+
+        <div class="print-footer">
+            <strong>مع تمنياتنا بالشفاء العاجل</strong><br>
+            <span style="font-size: 10px;">Powered by Begol System 👁️</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentPatientId = 0;
+        let dynamicServices = [];
+        let insuranceCompaniesList = [];
+        let currentUserRole = '';
+        let currentUserName = '';
+        let patientBase64Photo = '';
+        let capturedScannerBase64 = '';
+        let scannerStream = null;
+        let originalPatientData = null;
+        let currentLanguage = localStorage.getItem('begol_lang') || 'ar';
+        let searchModalInstance = null;
+
+        const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' fill='%2394a3b8' viewBox='0 0 16 16'><path d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z'/></svg>";
+
+        window.onload = function() {
+            currentUserName = sessionStorage.getItem('fullName');
+            if (!currentUserName || currentUserName === 'undefined' || currentUserName === 'null') {
+                currentUserName = 'مدير النظام';
+            }
+            
+            currentUserRole = sessionStorage.getItem('roleName') || 'Reception';
+            document.getElementById('lblUserBadge').innerText = `👤 ${currentUserName} (${currentUserRole})`;
+            searchModalInstance = new bootstrap.Modal(document.getElementById('advancedSearchModal'));
+
+            loadServicesFromDB();
+            loadDoctorsList();
+            loadInsuranceCompanies();
+            resetToIdleState();
+        };
+
+        function logout() { sessionStorage.clear(); window.location.href = '/index.html'; }
+
+        async function loadInsuranceCompanies() {
+            const select = document.getElementById('insuranceCompany');
+            try {
+                const res = await fetch('/api/admin/insurance');
+                insuranceCompaniesList = await res.json();
+                select.innerHTML = `<option value="">-- اختر شركة التأمين --</option>`;
+                insuranceCompaniesList.forEach(c => {
+                    const name = c.nameAr || c.NameAr;
+                    const copay = c.defaultCopay || c.DefaultCopay || '10%';
+                    select.innerHTML += `<option value="${name}" data-copay="${copay}">${name} (${copay})</option>`;
+                });
+            } catch (e) { select.innerHTML = '<option value="">(تعذر جلب الشركات)</option>'; }
+        }
+
+        function onInsuranceCompanySelected() {
+            const select = document.getElementById('insuranceCompany');
+            const selectedOpt = select.options[select.selectedIndex];
+            if (selectedOpt && selectedOpt.dataset.copay) {
+                document.getElementById('insuranceCopay').value = selectedOpt.dataset.copay;
+            }
+        }
+
+        function toggleLanguage() {
+            currentLanguage = (currentLanguage === 'ar') ? 'en' : 'ar';
+            localStorage.setItem('begol_lang', currentLanguage);
+        }
+
+        // دالة فك وإغلاق التابات
+        function updateTabLocks() {
+            const hasPatient = (currentPatientId > 0);
+            const btnServices = document.getElementById('btnTabServices');
+            const btnAttachments = document.getElementById('btnTabAttachments');
+
+            if (hasPatient) {
+                btnServices.classList.remove('tab-locked');
+                btnAttachments.classList.remove('tab-locked');
+                btnServices.removeAttribute('title');
+                btnAttachments.removeAttribute('title');
+            } else {
+                btnServices.classList.add('tab-locked');
+                btnAttachments.classList.add('tab-locked');
+                btnServices.setAttribute('title', 'يجب اختيار أو حفظ مريض أولاً');
+                btnAttachments.setAttribute('title', 'يجب اختيار أو حفظ مريض أولاً');
+            }
+        }
+
+        function switchTab(tab) {
+            if ((tab === 'services' || tab === 'attachments') && currentPatientId === 0) {
+                alert('⚠️ يرجى اختيار أو حفظ مريض أولاً!');
+                return;
+            }
+
+            document.getElementById('tabPatients').style.display = (tab === 'patients') ? 'block' : 'none';
+            document.getElementById('tabServices').style.display = (tab === 'services') ? 'block' : 'none';
+            document.getElementById('tabAttachments').style.display = (tab === 'attachments') ? 'block' : 'none';
+
+            document.getElementById('btnTabPatients').classList.toggle('active', tab === 'patients');
+            document.getElementById('btnTabServices').classList.toggle('active', tab === 'services');
+            document.getElementById('btnTabAttachments').classList.toggle('active', tab === 'attachments');
+
+            if (tab === 'attachments' && currentPatientId > 0) loadAttachments();
+        }
+
+        function resetToIdleState() {
+            currentPatientId = 0;
+            originalPatientData = null;
+            patientBase64Photo = '';
+
+            document.getElementById('lblCurrentName').innerText = 'يرجى الضغط على مريض جديد أو البحث عن مريض';
+            document.getElementById('lblCurrentDetails').innerText = 'الرقم القومي: -- | الهاتف: --';
+            document.getElementById('lblCurrentCode').innerText = '--';
+
+            document.querySelectorAll('#patientFormContainer input, #patientFormContainer select, #patientFormContainer textarea').forEach(el => {
+                el.value = '';
+                el.disabled = true;
+            });
+            document.getElementById('gender').value = 'ذكر';
+            document.getElementById('gov').value = 'القاهرة';
+            document.getElementById('district').value = 'عين شمس';
+            document.getElementById('insuranceType').value = 'نقدي';
+            toggleInsuranceFields();
+
+            setFormLock(true);
+            updateTabLocks();
+
+            document.getElementById('btnSaveNew').style.display = 'none';
+            document.getElementById('btnEnableEdit').style.display = 'none';
+            document.getElementById('btnSaveUpdate').style.display = 'none';
+            document.getElementById('btnCancelEdit').style.display = 'none';
+
+            document.getElementById('headerPatientImg').src = defaultAvatar;
+            document.getElementById('formPatientPhotoPreview').src = defaultAvatar;
+            document.getElementById('historyTableBody').innerHTML = `<tr><td colspan="7" class="text-muted py-3">لا توجد زيارات</td></tr>`;
+            document.getElementById('attachmentsListContainer').innerHTML = `<div class="text-muted text-center py-4">اختر مريضاً أولاً</div>`;
+        }
+
+        async function startNewPatientEntry() {
+            resetToIdleState();
+            setFormLock(false);
+            document.getElementById('lblCurrentName').innerText = 'إدخال مريض جديد (لم يُحفظ بعد)';
+            document.getElementById('btnSaveNew').style.display = 'inline-block';
+            document.getElementById('ar1').focus();
+            await loadNextCode();
+        }
+
+        async function loadNextCode() {
+            try {
+                const res = await fetch('/api/reception/next-code');
+                const data = await res.json();
+                document.getElementById('lblCurrentCode').innerText = data.nextCode;
+            } catch (e) { document.getElementById('lblCurrentCode').innerText = '1'; }
+        }
+
+        function setFormLock(isLocked) {
+            const container = document.getElementById('patientFormContainer');
+            container.querySelectorAll('input, select, textarea').forEach(el => { el.disabled = isLocked; });
+            if (isLocked) container.classList.add('form-locked');
+            else container.classList.remove('form-locked');
+        }
+
+        function enableEditing() {
+            setFormLock(false);
+            document.getElementById('btnEnableEdit').style.display = 'none';
+            document.getElementById('btnSaveUpdate').style.display = 'inline-block';
+            document.getElementById('btnCancelEdit').style.display = 'inline-block';
+        }
+
+        function cancelEditing() {
+            if (originalPatientData) populateForm(originalPatientData);
+            setFormLock(true);
+            document.getElementById('btnEnableEdit').style.display = 'inline-block';
+            document.getElementById('btnSaveUpdate').style.display = 'none';
+            document.getElementById('btnCancelEdit').style.display = 'none';
+        }
+
+        function openAdvancedSearchModal() { searchModalInstance.show(); }
+        function clearSearchModalInputs() {
+            ['srchAr1','srchAr2','srchAr3','srchAr4','srchMobile','srchNationalId','srchDateFrom','srchDateTo'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('searchResultsTableBody').innerHTML = `<tr><td colspan="6" class="text-muted py-4">أدخل معايير البحث</td></tr>`;
+            document.getElementById('lblSearchResultsCount').innerText = '0 مريض';
+        }
+
+        async function executeAdvancedSearch() {
+            const ar1 = document.getElementById('srchAr1').value.trim();
+            const ar2 = document.getElementById('srchAr2').value.trim();
+            const ar3 = document.getElementById('srchAr3').value.trim();
+            const ar4 = document.getElementById('srchAr4').value.trim();
+            const mobile = document.getElementById('srchMobile').value.trim();
+            const nationalId = document.getElementById('srchNationalId').value.trim();
+            const from = document.getElementById('srchDateFrom').value;
+            const to = document.getElementById('srchDateTo').value;
+
+            const tbody = document.getElementById('searchResultsTableBody');
+            tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-primary">🔍 جاري البحث في السحاب...</td></tr>`;
+
+            try {
+                let query = `/api/reception/search-advanced?ar1=${encodeURIComponent(ar1)}&ar2=${encodeURIComponent(ar2)}&ar3=${encodeURIComponent(ar3)}&ar4=${encodeURIComponent(ar4)}&mobile=${encodeURIComponent(mobile)}&nationalId=${encodeURIComponent(nationalId)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+                let res = await fetch(query);
+                if (!res.ok) res = await fetch('/api/reception/search?q=' + encodeURIComponent(mobile || nationalId || ar1));
+
+                const list = await res.json();
+                tbody.innerHTML = '';
+                if (!list || list.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-danger py-4">لم يتم العثور على نتائج</td></tr>`;
+                    document.getElementById('lblSearchResultsCount').innerText = '0 مريض';
+                    return;
+                }
+
+                document.getElementById('lblSearchResultsCount').innerText = `${list.length} مريض`;
+                list.forEach(p => {
+                    const fullName = p.fullName || `${p.ar1 || ''} ${p.ar2 || ''} ${p.ar3 || ''} ${p.ar4 || ''}`.trim();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span class="badge bg-success fs-6 px-2">${p.patientId}</span></td>
+                            <td class="fw-bold text-start ps-3">${fullName}</td>
+                            <td>${p.mobile || '--'}</td>
+                            <td>${p.nationalId || '--'}</td>
+                            <td><small class="text-muted">${p.createdAt || '--'}</small></td>
+                            <td><button class="btn btn-sm btn-success fw-bold px-3 shadow-sm" onclick="selectPatientFromSearch(${p.patientId})">✔️ فتح الملف</button></td>
+                        </tr>`;
+                });
+            } catch (e) { tbody.innerHTML = `<tr><td colspan="6" class="text-danger py-4">خطأ في الاتصال</td></tr>`; }
+        }
+
+        async function selectPatientFromSearch(id) { 
+            searchModalInstance.hide(); 
+            await loadPatient(id); 
+        }
+
+        async function executeQuickSearch() {
+            const val = document.getElementById('txtQuickCodeSearch').value.trim();
+            if (!val) {
+                openAdvancedSearchModal();
+                return;
+            }
+            try {
+                const res = await fetch('/api/reception/search?q=' + encodeURIComponent(val));
+                const list = await res.json();
+                if (list && list.length > 0) {
+                    await loadPatient(list[0].patientId);
+                    document.getElementById('txtQuickCodeSearch').value = '';
+                } else {
+                    alert('⚠️ لم يتم العثور على أي مريض بهذا الكود أو الاسم أو الهاتف!');
+                    openAdvancedSearchModal();
+                }
+            } catch (e) {
+                openAdvancedSearchModal();
+            }
+        }
+
+        // دالة الحفظ المعدلة لفك القفل فوراً
+        async function savePatient(mode) {
+            const ar1 = document.getElementById('ar1').value.trim();
+            const mobile = document.getElementById('mobile').value.trim();
+
+            if (!ar1) { alert('الاسم الأول مطلوب!'); document.getElementById('ar1').focus(); return; }
+            if (!mobile) { alert('رقم المحمول مطلوب!'); document.getElementById('mobile').focus(); return; }
+
+            const rawAge = document.getElementById('age').value.trim();
+            const payload = {
+                patientId: currentPatientId || 0,
+                ar1,
+                ar2: document.getElementById('ar2').value.trim(),
+                ar3: document.getElementById('ar3').value.trim(),
+                ar4: document.getElementById('ar4').value.trim(),
+                nationalId: document.getElementById('nationalId').value.trim(),
+                mobile: mobile,
+                birthDate: document.getElementById('birthDate').value || null,
+                age: rawAge ? parseInt(rawAge) : null,
+                gender: document.getElementById('gender').value,
+                gov: document.getElementById('gov').value.trim() || 'القاهرة',
+                district: document.getElementById('district').value.trim() || 'عين شمس',
+                address: document.getElementById('address').value.trim(),
+                photoData: patientBase64Photo || '',
+                insuranceType: document.getElementById('insuranceType').value,
+                insuranceCompany: document.getElementById('insuranceCompany').value,
+                insuranceCardNo: document.getElementById('insuranceCardNo').value.trim(),
+                insuranceMemberType: document.getElementById('insuranceMemberType').value,
+                insurancePrimaryHolder: document.getElementById('insurancePrimaryHolder').value.trim(),
+                insuranceCopay: document.getElementById('insuranceCopay').value.trim(),
+                notes: document.getElementById('patientNotes').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/reception/patients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (res.ok && (data.success || data.Success)) {
+                    const savedId = data.patientId || data.PatientId;
+                    currentPatientId = savedId;
+                    
+                    // فك قفل التابات فوراً
+                    updateTabLocks();
+
+                    alert(`✅ تم حفظ ملف المريض بنجاح برقم ملف: #${savedId}`);
+                    await loadPatient(savedId);
+                } else {
+                    alert('❌ خطأ: ' + (data.message || data.Message || 'فشلت العملية'));
+                }
+            } catch (err) { alert('❌ خطأ في الاتصال بالخادم.'); }
+        }
+
+        // دالة فتح وتعبئة ملف المريض وفك أقفال الشاشات
+        async function loadPatient(id) {
+            try {
+                const res = await fetch('/api/reception/patient/' + id);
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                currentPatientId = id;
+                originalPatientData = data.patient;
+                populateForm(data.patient);
+
+                setFormLock(true);
+                
+                // فك قفل التابات فوراً
+                updateTabLocks();
+
+                document.getElementById('btnSaveNew').style.display = 'none';
+                document.getElementById('btnEnableEdit').style.display = 'inline-block';
+                document.getElementById('btnSaveUpdate').style.display = 'none';
+                document.getElementById('btnCancelEdit').style.display = 'none';
+
+                const tbody = document.getElementById('historyTableBody');
+                tbody.innerHTML = '';
+                if (!data.history || data.history.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-muted py-3">لا توجد زيارات سابقة لهذا المريض</td></tr>`;
+                } else {
+                    data.history.forEach((h, index) => {
+                        let eyeBadge = (h.eyeSide && h.eyeSide !== 'عام') ? `<br><small class="text-danger fw-bold">${h.eyeSide}</small>` : '';
+                        let invoiceBadge = h.invoiceNo === '-' ? `<span class="badge bg-secondary">-</span>` : `<span class="badge bg-primary px-2 py-1">${h.invoiceNo}</span>`;
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="fw-bold">${index + 1}</td>
+                                <td class="fw-bold">${h.serviceType} ${eyeBadge}</td>
+                                <td>${h.visitDate}</td>
+                                <td>${h.visitTime}</td>
+                                <td class="text-success fw-bold">${h.doctorName}</td>
+                                <td>${invoiceBadge}</td>
+                                <td class="text-secondary small fw-bold">${h.createdBy}</td>
+                            </tr>`;
+                    });
+                }
+                loadAttachments();
+            } catch (e) { }
+        }
+
+        function populateForm(p) {
+            currentPatientId = p.patientId;
+            document.getElementById('lblCurrentCode').innerText = p.patientId;
+            document.getElementById('lblCurrentName').innerText = p.fullName || `${p.ar1} ${p.ar2} ${p.ar3} ${p.ar4}`;
+            document.getElementById('lblCurrentDetails').innerText = `الرقم القومي: ${p.nationalId || '--'} | الهاتف: ${p.mobile || '--'}`;
+
+            document.getElementById('ar1').value = p.ar1 || '';
+            document.getElementById('ar2').value = p.ar2 || '';
+            document.getElementById('ar3').value = p.ar3 || '';
+            document.getElementById('ar4').value = p.ar4 || '';
+            document.getElementById('nationalId').value = p.nationalId || '';
+            document.getElementById('mobile').value = p.mobile || '';
+            document.getElementById('birthDate').value = p.birthDate || '';
+            document.getElementById('age').value = p.age || '';
+            document.getElementById('gender').value = p.gender || 'ذكر';
+            document.getElementById('gov').value = p.gov || 'القاهرة';
+            document.getElementById('district').value = p.district || 'عين شمس';
+            document.getElementById('address').value = p.address || '';
+
+            document.getElementById('insuranceType').value = p.insuranceType || 'نقدي';
+            document.getElementById('insuranceCompany').value = p.insuranceCompany || '';
+            document.getElementById('insuranceCardNo').value = p.insuranceCardNo || '';
+            document.getElementById('insuranceMemberType').value = p.insuranceMemberType || 'عضو أصيل';
+            document.getElementById('insurancePrimaryHolder').value = p.insurancePrimaryHolder || '';
+            document.getElementById('insuranceCopay').value = p.insuranceCopay || '';
+            document.getElementById('patientNotes').value = p.notes || '';
+
+            toggleInsuranceFields();
+
+            patientBase64Photo = p.photoData || '';
+            const photoSrc = patientBase64Photo ? patientBase64Photo : defaultAvatar;
+            document.getElementById('headerPatientImg').src = photoSrc;
+            document.getElementById('formPatientPhotoPreview').src = photoSrc;
+        }
+
+        function toggleInsuranceFields() {
+            const isInsurance = document.getElementById('insuranceType').value === 'تأمين';
+            document.querySelectorAll('.ins-field').forEach(el => { el.style.display = isInsurance ? 'block' : 'none'; });
+            if (isInsurance) togglePrimaryHolder();
+        }
+
+        function togglePrimaryHolder() {
+            const memberType = document.getElementById('insuranceMemberType').value;
+            document.getElementById('divPrimaryHolder').style.display = (memberType !== 'عضو أصيل' && document.getElementById('insuranceType').value === 'تأمين') ? 'block' : 'none';
+        }
+
+        function previewPatientPhoto(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    patientBase64Photo = e.target.result;
+                    document.getElementById('formPatientPhotoPreview').src = patientBase64Photo;
+                    document.getElementById('headerPatientImg').src = patientBase64Photo;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function calcAgeFromBirth() {
+            const b = document.getElementById('birthDate').value;
+            if (!b) return;
+            const diff = Date.now() - new Date(b).getTime();
+            const calculatedAge = Math.abs(new Date(diff).getUTCFullYear() - 1970);
+            if (!isNaN(calculatedAge)) document.getElementById('age').value = calculatedAge;
+        }
+
+        async function loadDoctorsList() {
+            try {
+                const res = await fetch('/api/admin/doctors');
+                const list = await res.json();
+                const sel = document.getElementById('cmbDoctorSelectRec');
+                sel.innerHTML = `<option value="">-- عيادة عامة --</option>`;
+                list.forEach(d => { 
+                    sel.innerHTML += `<option value="${d.name}">د. ${d.name} (${d.title})</option>`; 
+                });
+            } catch (e) { }
+        }
+
+        async function loadServicesFromDB() {
+            try {
+                const res = await fetch('/api/admin/services');
+                dynamicServices = await res.json();
+                onClinicChange();
+            } catch (e) { }
+        }
+
+        function onClinicChange() {
+            const clinic = document.getElementById('cmbClinic').value;
+            const serviceSelect = document.getElementById('cmbServiceType');
+            serviceSelect.innerHTML = '';
+
+            const isConsultation = (clinic === 'عيادة الكشف');
+            document.getElementById('divConsultationType').style.display = isConsultation ? 'block' : 'none';
+            document.getElementById('divEyeScopeContainer').style.display = isConsultation ? 'none' : 'block';
+            if (isConsultation) document.getElementById('divEyeSide').style.display = 'none';
+            else onEyeScopeChange();
+
+            const filtered = dynamicServices.filter(s => s.category === clinic);
+            filtered.forEach(s => {
+                let cleanName = s.name.replace(/\(عين واحدة.*?\)/g, '').replace(/\(عينين.*?\)/g, '').trim();
+                serviceSelect.innerHTML += `<option value="${cleanName}" data-price="${s.price}">${cleanName}</option>`;
+            });
+            calculateFinalPrice();
+        }
+
+        function onEyeScopeChange() {
+            if (document.getElementById('cmbClinic').value === 'عيادة الكشف') return;
+            const scope = document.getElementById('cmbEyeScope').value;
+            document.getElementById('divEyeSide').style.display = (scope === 'single') ? 'block' : 'none';
+            calculateFinalPrice();
+        }
+
+        function onServiceChange() { calculateFinalPrice(); }
+
+        function calculateFinalPrice() {
+            const clinic = document.getElementById('cmbClinic').value;
+            const select = document.getElementById('cmbServiceType');
+            const selectedOpt = select.options[select.selectedIndex];
+            let basePrice = (selectedOpt && selectedOpt.dataset.price) ? parseFloat(selectedOpt.dataset.price) : 0;
+
+            if (clinic === 'عيادة الكشف') {
+                const visitType = document.getElementById('cmbVisitType').value;
+                document.getElementById('txtPrice').value = (visitType === 'استشارة' || visitType === 'عرض تقرير') ? 0 : basePrice;
+                return;
+            }
+
+            const scope = document.getElementById('cmbEyeScope').value;
+            document.getElementById('txtPrice').value = (scope === 'both') ? (basePrice * 2) : basePrice;
+        }
+
+        async function bookService() {
+            if (currentPatientId === 0) { alert('اختر مريضاً أولاً!'); return; }
+            const serviceVal = document.getElementById('cmbServiceType').value;
+            if (!serviceVal) { alert('اختر خدمة صحيحة!'); return; }
+
+            const clinicVal = document.getElementById('cmbClinic').value;
+            const priceVal = parseFloat(document.getElementById('txtPrice').value || 0);
+            const docVal = document.getElementById('cmbDoctorSelectRec').value;
+
+            let fullServiceName = serviceVal;
+            let eyeInfo = "";
+
+            if (clinicVal === 'عيادة الكشف') {
+                const visitType = document.getElementById('cmbVisitType').value;
+                fullServiceName = `${serviceVal} (${visitType})`;
+                eyeInfo = visitType;
+            } else {
+                const scope = document.getElementById('cmbEyeScope').value;
+                eyeInfo = (scope === 'both') ? "كلتا العينين (OU)" : document.getElementById('cmbEyeSide').value;
+                fullServiceName = `${serviceVal}`; 
+            }
+
+            let printInvoice = priceVal > 0 ? `INV-${Math.floor(Math.random() * 90000) + 10000}` : '-';
+
+            const payload = {
+                patientId: currentPatientId,
+                clinic: clinicVal,
+                serviceType: fullServiceName,
+                eyeSide: eyeInfo,
+                price: priceVal,
+                doctorName: docVal,
+                userName: currentUserName
+            };
+
+            try {
+                const res = await fetch('/api/reception/book-service', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    const now = new Date();
+                    document.getElementById('ptDateTime').innerText = now.toLocaleDateString('ar-EG') + ' - ' + now.toLocaleTimeString('ar-EG');
+
+                    document.getElementById('printTicketArea').style.display = 'block';
+                    document.getElementById('ptQueue').innerText = data.queueNumber;
+                    document.getElementById('ptCode').innerText = currentPatientId;
+                    document.getElementById('ptName').innerText = document.getElementById('lblCurrentName').innerText;
+                    document.getElementById('ptService').innerText = fullServiceName + ((eyeInfo && eyeInfo !== 'عام' && clinicVal !== 'عيادة الكشف') ? ' [' + eyeInfo + ']' : '');
+                    document.getElementById('ptDoctor').innerText = docVal ? `د. ${docVal}` : 'عيادة عامة';
+                    document.getElementById('ptInvoice').innerText = printInvoice;
+                    document.getElementById('ptPrice').innerText = priceVal;
+                    document.getElementById('ptUser').innerText = currentUserName;
+
+                    window.print();
+                    
+                    document.getElementById('printTicketArea').style.display = 'none';
+
+                    loadPatient(currentPatientId);
+                } else {
+                    alert("حدث خطأ في الحجز: " + (data.message || ""));
+                }
+            } catch (err) {
+                alert("فشل الاتصال بالسيرفر");
+            }
+        }
+
+        // ========================================================
+        // دوال السكانر المباشر والمرفقات
+        // ========================================================
+        function toggleUploadMode(mode) {
+            document.getElementById('btnModeFile').classList.toggle('active', mode === 'file');
+            document.getElementById('btnModeCam').classList.toggle('active', mode === 'cam');
+
+            document.getElementById('uploadFileSection').style.display = (mode === 'file') ? 'block' : 'none';
+            document.getElementById('uploadCamSection').style.display = (mode === 'cam') ? 'block' : 'none';
+
+            if (mode === 'cam') {
+                startScannerCamera();
+            } else {
+                stopScannerCamera();
+            }
+        }
+
+        async function startScannerCamera() {
+            try {
+                const video = document.getElementById('scannerVideo');
+                scannerStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720, facingMode: "environment" } });
+                video.srcObject = scannerStream;
+            } catch (err) {
+                alert('تعذر فتح الكاميرا أو السكانر. تأكد من إعطاء الصلاحية للمتصفح!');
+            }
+        }
+
+        function stopScannerCamera() {
+            if (scannerStream) {
+                scannerStream.getTracks().forEach(track => track.stop());
+                scannerStream = null;
+            }
+        }
+
+        function captureScannerSnapshot() {
+            const video = document.getElementById('scannerVideo');
+            const canvas = document.getElementById('scannerCanvas');
+            if (!scannerStream) { alert('شغل الكاميرا أولاً!'); return; }
+
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            capturedScannerBase64 = canvas.toDataURL('image/jpeg', 0.9);
+            document.getElementById('capturedImagePreview').src = capturedScannerBase64;
+            document.getElementById('capturePreviewContainer').style.display = 'block';
+            alert('📸 تم مسح المستند بنجاح! اضغط الآن "حفظ المرفق" لرفعه.');
+        }
+
+        async function uploadAttachment() {
+            if (currentPatientId === 0) { alert('اختر مريضاً أولاً!'); return; }
+            const title = document.getElementById('attTitle').value.trim();
+            const fileInput = document.getElementById('attFile');
+
+            if (!title) { alert('يرجى كتابة وصف المرفق!'); return; }
+
+            const formData = new FormData();
+            formData.append('patientId', currentPatientId);
+            formData.append('title', title);
+            formData.append('userName', currentUserName);
+
+            // لو في صورة ممسوحة بالسكانر
+            if (capturedScannerBase64) {
+                formData.append('scanBase64', capturedScannerBase64);
+            } else if (fileInput.files && fileInput.files.length > 0) {
+                formData.append('file', fileInput.files[0]);
+            } else {
+                alert('اختر ملف أو التقط صورة من السكانر أولاً!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/reception/upload-attachment', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`✅ تم حفظ المرفق بالسحاب بنجاح بالسيريال رقم:\n${data.serialNo}`);
+                    document.getElementById('attTitle').value = '';
+                    document.getElementById('attFile').value = '';
+                    capturedScannerBase64 = '';
+                    document.getElementById('capturePreviewContainer').style.display = 'none';
+                    stopScannerCamera();
+                    toggleUploadMode('file');
+                    loadAttachments();
+                } else {
+                    alert('خطأ: ' + (data.message || 'فشل الحفظ'));
+                }
+            } catch (e) {
+                alert('فشل الاتصال بالسيرفر لحفظ المرفق');
+            }
+        }
+
+        async function loadAttachments() {
+            const container = document.getElementById('attachmentsListContainer');
+            if (currentPatientId === 0) return;
+
+            try {
+                const res = await fetch('/api/reception/attachments/' + currentPatientId);
+                const list = await res.json();
+                container.innerHTML = '';
+
+                if (!list || list.length === 0) {
+                    container.innerHTML = `<div class="text-muted text-center py-4">لا توجد مرفقات مسجلة لهذا المريض</div>`;
+                    return;
+                }
+
+                list.forEach(a => {
+                    container.innerHTML += `
+                        <div class="attachment-item shadow-sm">
+                            <div>
+                                <span class="serial-badge me-2">${a.serialNo}</span>
+                                <strong class="text-dark">${a.fileName}</strong>
+                                <small class="text-muted d-block mt-1">بواسطة: ${a.createdBy} | ${a.uploadDate}</small>
+                            </div>
+                            <div>
+                                <a href="/api/reception/attachment-download/${a.id}" target="_blank" class="btn btn-sm btn-outline-success py-1 px-3 fw-bold">👁️ عرض / تنزيل</a>
+                            </div>
+                        </div>`;
+                });
+            } catch (e) { }
+        }
+    </script>
+</body>
+</html>

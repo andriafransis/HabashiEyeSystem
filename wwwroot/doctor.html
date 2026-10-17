@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">مركز حبشي للعيون - نظام بيجول (عيادة الطبيب)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" id="bootstrapCss">
+    <style>
+        body { background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+        .top-navbar { background-color: #ffffff; border-bottom: 2px solid #cbd5e1; }
+        .dept-tab-btn { font-weight: 700; border-radius: 8px; margin: 0 3px; font-size: 0.9rem; }
+        .dept-tab-btn.active { background-color: #1e40af !important; color: #ffffff !important; border-color: #1e40af !important; }
+        .queue-col { border-left: 2px solid #e2e8f0; min-height: 88vh; }
+        html[dir="ltr"] .queue-col { border-left: none; border-right: 2px solid #e2e8f0; }
+        .queue-item { cursor: pointer; transition: 0.2s; border-right: 4px solid transparent; }
+        html[dir="ltr"] .queue-item { border-right: none; border-left: 4px solid transparent; }
+        .queue-item:hover { background-color: #f8fafc; }
+        .queue-item.active { background-color: #eff6ff; border-right-color: #2563eb; }
+        html[dir="ltr"] .queue-item.active { border-left-color: #2563eb; }
+        .section-header { font-size: 0.95rem; font-weight: bold; color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 12px; }
+        
+        .eye-card-od { background: #f0f7ff; border: 2px solid #93c5fd; border-radius: 12px; }
+        .eye-card-os { background: #fff1f2; border: 2px solid #fca5a5; border-radius: 12px; }
+        .center-ipd-card { background: #f8fafc; border: 2px dashed #94a3b8; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; }
+        .optic-input-group label { font-size: 0.8rem; font-weight: 800; margin-bottom: 2px; }
+        .optic-input-group input { text-align: center; font-weight: bold; font-size: 1rem; height: 38px; }
+        .badge-queue { font-size: 1.1rem; font-weight: 700; }
+        .dilation-card { background: #fffbeb; border: 2px solid #facc15; border-radius: 10px; padding: 12px; }
+        
+        .doctor-actions-toolbar { background: #ffffff; border: 2px solid #bfdbfe; border-radius: 10px; padding: 10px 15px; margin-bottom: 15px; }
+
+        .scan-container-box { background: #ffffff; border: 2px solid #38bdf8; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .laser-container-box { background: #ffffff; border: 2px solid #f97316; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .surgery-container-box { background: #ffffff; border: 2px solid #10b981; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        
+        .report-header-preview { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
+        .laser-header-box { background: #fff7ed; border-right: 5px solid #ea580c; padding: 10px 15px; border-radius: 6px; }
+        html[dir="ltr"] .laser-header-box { border-right: none; border-left: 5px solid #ea580c; }
+        .surgery-header-box { background: #ecfdf5; border-right: 5px solid #059669; padding: 12px 18px; border-radius: 8px; }
+        html[dir="ltr"] .surgery-header-box { border-right: none; border-left: 5px solid #059669; }
+
+        .timer-badge { font-family: monospace; font-size: 1.25rem; font-weight: 800; padding: 6px 14px; border-radius: 6px; }
+
+        .begol-footer {
+            margin-top: auto;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            padding: 12px 20px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .andy-badge {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- البار العلوي -->
+    <nav class="top-navbar py-2 px-3 shadow-sm mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center">
+                <span class="fs-4 me-2 text-primary">👁️</span>
+                <div>
+                    <h5 class="m-0 fw-bold text-dark" id="navCenterTitle">مركز حبشي التخصصي للعيون</h5>
+                    <small class="text-primary fw-bold" style="font-size: 0.75rem;" id="navSystemTitle">نظام بيجول (Begol) • عيادة الكشف الطبي</small>
+                </div>
+                
+                <!-- أزرار التابات الأربعة -->
+                <div class="d-flex align-items-center mx-3 flex-wrap gap-1">
+                    <button id="btnClinicTab" class="btn btn-outline-primary dept-tab-btn active" onclick="switchDepartment('عيادة الكشف')">🩺 <span id="lblTabClinic">عيادة الكشف</span></button>
+                    <button id="btnScansTab" class="btn btn-outline-primary dept-tab-btn" onclick="switchDepartment('وحدة الفحوصات')">🔬 <span id="lblTabScans">وحدة الفحوصات والأشعة</span></button>
+                    <button id="btnLaserTab" class="btn btn-outline-primary dept-tab-btn" onclick="switchDepartment('وحدة الليزر')">⚡ <span id="lblTabLaser">وحدة الليزر والشبكية</span></button>
+                    <button id="btnSurgeryTab" class="btn btn-outline-success dept-tab-btn" onclick="switchDepartment('وحدة العمليات')">🏥 <span id="lblTabSurgery">العمليات الجراحية</span></button>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-dark fw-bold px-2 py-1 shadow-sm" onclick="toggleLanguage()" id="btnLangToggle">🌐 English</button>
+
+                <div id="adminNavSection" class="d-none align-items-center me-2 border-start ps-2">
+                    <a href="/admin.html" class="btn btn-outline-danger btn-sm me-1" id="navAdminLink">⚙️ الإدارة</a>
+                    <a href="/reception.html" class="btn btn-outline-primary btn-sm me-1" id="navRecLink">👥 الاستقبال</a>
+                    <a href="/callcenter.html" class="btn btn-outline-info btn-sm me-1" id="navCallLink">📞 الكول سنتر</a>
+                    <a href="/queue.html" target="_blank" class="btn btn-outline-warning btn-sm" id="navQueueLink">📺 الانتظار</a>
+                </div>
+                <span id="lblDoctorBadge" class="badge bg-light text-dark border p-2">👨‍⚕️ الطبيب: ...</span>
+                <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logout()" id="btnLogout">خروج 🚪</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-3 flex-grow-1">
+        <div class="row g-3">
+            
+            <!-- قائمة الانتظار الجانبية -->
+            <div class="col-lg-3 col-md-4 queue-col">
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-white py-2">
+                        <div class="fw-bold text-primary mb-2 small" id="queueSectionTitle">⏳ طابور: عيادة الكشف</div>
+                        <div class="input-group input-group-sm mb-2">
+                            <input type="text" id="txtDoctorQuickSearch" class="form-control" placeholder="🔍 كود أو اسم المريض..." onkeypress="if(event.key==='Enter') doctorQuickSearch()">
+                            <button class="btn btn-outline-primary" onclick="doctorQuickSearch()" id="btnQuickSearch">فتح</button>
+                        </div>
+
+                        <div class="btn-group w-100 mb-2" role="group">
+                            <button type="button" id="btnShowWaiting" class="btn btn-sm btn-outline-primary fw-bold active" onclick="setQueueTab('waiting')">⏳ بالانتظار</button>
+                            <button type="button" id="btnShowFinished" class="btn btn-sm btn-outline-success fw-bold" onclick="setQueueTab('finished')">✔️ المكتملة (Recall)</button>
+                        </div>
+                        
+                        <div id="prepFilterBox" style="display: none;" class="p-2 bg-light rounded border">
+                            <label class="form-label small fw-bold text-success mb-1" id="lblPrepConsultant">تحضير حالات استشاري:</label>
+                            <select id="cmbPrepConsultant" class="form-select form-select-sm fw-bold border-success" onchange="loadCurrentQueueView()">
+                                <option value="">🌐 جميع الاستشاريين (عرض كل الحالات)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body p-0" style="max-height: 75vh; overflow-y: auto;">
+                        <ul id="queueList" class="list-group list-group-flush small">
+                            <li class="list-group-item text-muted text-center py-4" id="lblQueueLoading">جاري تحميل قائمة المرضى...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- محتوى الشاشة الرئيسي -->
+            <div class="col-lg-9 col-md-8">
+                
+                <!-- شريط بيانات المريض -->
+                <div class="card shadow-sm border-0 mb-3 border-start border-4 border-primary">
+                    <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h5 id="docPatientName" class="m-0 fw-bold text-dark">اختر مريضاً من قائمة الانتظار للبدء</h5>
+                            <small id="docPatientDetails" class="text-muted">الرقم القومي: -- | الهاتف: -- | السن: --</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="docDeptBadge" class="badge bg-info text-dark px-2 py-2">القسم: --</span>
+                            <span id="docQueueBadge" class="badge bg-secondary badge-queue px-3 py-2">الدور: --</span>
+                            <span id="docFileCode" class="badge bg-light text-primary border px-3 py-2">الكود: --</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="examContainer" style="opacity: 0.5; pointer-events: none;">
+                    
+                    <!-- 1. وضع عيادة الكشف -->
+                    <div id="clinicSpecificSection">
+                        <div class="doctor-actions-toolbar shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span class="fw-bold text-primary" id="lblDocActions">📄 المطبوعات والتحويلات:</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="printGlassesRx()" id="btnPrtGlasses">👓 كشف النظارة</button>
+                                <button type="button" class="btn btn-sm btn-outline-success fw-bold" onclick="printPrescription()" id="btnPrtRx">💊 الروشتة</button>
+                                <button type="button" class="btn btn-sm btn-outline-info fw-bold" onclick="openReferralModal('scans')" id="btnRefScans">🔬 تحويل فحوصات</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="openReferralModal('labs')" id="btnRefLabs">🧪 تحويل تحاليل</button>
+                                <button type="button" class="btn btn-sm btn-outline-dark fw-bold" onclick="openReferralModal('doctor')" id="btnRefDoc">👨‍⚕️ تحويل لطبيب</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="openReferralModal('surgery')" id="btnRefSurg">🏥 قرار عملية</button>
+                                <button type="button" class="btn btn-sm btn-dark fw-bold" onclick="showPatientOrdersHistory()" id="btnOrdersHist">📂 سجل الأوامر</button>
+                            </div>
+                        </div>
+
+                        <!-- التوسيع -->
+                        <div class="dilation-card mb-3 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-5">💧</span>
+                                    <h6 class="fw-bold text-dark m-0" id="lblDilationTitle">أمر قطرة توسيع الحدقة والتحضير (Dilation Order):</h6>
+                                </div>
+                                <span id="lblDilationStatus" class="badge bg-secondary">لم يتم طلب توسيع</span>
+                            </div>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold" id="lblDilationType">نوع قطرة التوسيع المطلوبة:*</label>
+                                    <select id="cmbDilationType" class="form-select form-select-sm fw-bold">
+                                        <option value="Mydriacyl 1% (Tropicamide)">Mydriacyl 1% (ميدرياسيل سريع)</option>
+                                        <option value="Cyclopentolate 1% (سيكلوبنتوليت)">Cyclopentolate 1% (سيكلوبنتوليت)</option>
+                                        <option value="Phenylephrine 2.5%">Phenylephrine 2.5% (فينيليفرين)</option>
+                                        <option value="Tropicamide + Phenylephrine">مزيج مركب (Tropicamide + Phenyl)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold" id="lblDilationEye">العين المطلوب توسيعها:*</label>
+                                    <select id="cmbDilationEye" class="form-select form-select-sm fw-bold">
+                                        <option value="العينين معاً (OU)" id="optDilOU">العينين معاً (Both Eyes - OU)</option>
+                                        <option value="العين اليمنى فقط (OD)" id="optDilOD">العين اليمنى فقط (Right - OD)</option>
+                                        <option value="العين اليسرى فقط (OS)" id="optDilOS">العين اليسرى فقط (Left - OS)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold" id="lblPostRefract">إعادة مقاس كمبيوتر بعد التوسيع؟</label>
+                                    <select id="cmbPostRefraction" class="form-select form-select-sm fw-bold">
+                                        <option value="false" id="optPostNo">لا، فحص قاع عين فقط</option>
+                                        <option value="true" id="optPostYes">نعم، مطلوب كشف كمبيوتر بعد التوسيع</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-warning btn-sm w-100 fw-bold text-dark" onclick="sendDilationOrder()" id="btnSendDil">💧 إرسال للتمريض</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- الفحص والتشخيص -->
+                        <div class="card shadow-sm border-0 mb-3">
+                            <div class="card-body py-3">
+                                <div class="section-header" id="secExamTitle">🔍 الفحص الإكلينيكي والتشخيص</div>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" id="lblComplaint">شكوى المريض (Chief Complaint):</label>
+                                        <textarea id="txtComplaint" class="form-control form-control-sm" rows="2" placeholder="أعراض المريض، مدة الشكوى..."></textarea>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" id="lblFindings">فحص المصباح الشقي (Slit Lamp / Findings):</label>
+                                        <textarea id="txtFindings" class="form-control form-control-sm" rows="2" placeholder="القرنية، العدسة، الحجرة الأمامية، قاع العين..."></textarea>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" id="lblDiagnosis">التشخيص (Diagnosis):</label>
+                                        <textarea id="txtDiagnosis" class="form-control form-control-sm" rows="2" placeholder="التشخيص النهائي أو المبدئي..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- النظارة -->
+                        <div class="card shadow-sm border-0 mb-3">
+                            <div class="card-body py-3">
+                                <div class="section-header m-0 border-0 p-0 mb-2" id="secGlassesTitle">👓 مقاسات النظارة والفحص البصري (Refraction)</div>
+                                <div class="row g-3 align-items-stretch">
+                                    <div class="col-md-5">
+                                        <div class="eye-card-od p-3 h-100 shadow-sm">
+                                            <div class="text-center fw-bold text-primary border-bottom border-primary pb-2 mb-3 fs-5" id="lblRightEyeCard">👁️ العين اليمنى (Right / OD)</div>
+                                            <div class="row g-2">
+                                                <div class="col-6 optic-input-group"><label class="text-primary">SPH:</label><input type="text" id="od_sph" class="form-control" placeholder="0.00"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-primary">CYL:</label><input type="text" id="od_cyl" class="form-control" placeholder="0.00"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-primary">AXIS:</label><input type="text" id="od_axis" class="form-control" placeholder="180"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-primary">ADD:</label><input type="text" id="od_add" class="form-control" placeholder="+2.00"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-primary">VA:</label><input type="text" id="od_va" class="form-control" placeholder="6/6"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-primary">IOP:</label><input type="text" id="od_iop" class="form-control" placeholder="15"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="center-ipd-card p-2 text-center h-100 shadow-sm">
+                                            <div class="optic-input-group mb-3">
+                                                <label class="text-dark fw-bold">📏 IPD (mm):</label>
+                                                <input type="text" id="ipd" class="form-control border-dark" placeholder="63">
+                                            </div>
+                                            <hr class="my-1">
+                                            <div class="small fw-bold text-muted my-2" id="lblLensType">نوع العدسة</div>
+                                            <select id="cmbLensCategory" class="form-select form-select-sm text-center fw-bold">
+                                                <option value="Single Vision" id="optLens1">مسافات فقط</option>
+                                                <option value="Reading" id="optLens2">قراءة فقط</option>
+                                                <option value="Bifocal" id="optLens3">ثنائية البؤرة</option>
+                                                <option value="Progressive" id="optLens4">بروجريسيف</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-5">
+                                        <div class="eye-card-os p-3 h-100 shadow-sm">
+                                            <div class="text-center fw-bold text-danger border-bottom border-danger pb-2 mb-3 fs-5" id="lblLeftEyeCard">👁️ العين اليسرى (Left / OS)</div>
+                                            <div class="row g-2">
+                                                <div class="col-6 optic-input-group"><label class="text-danger">SPH:</label><input type="text" id="os_sph" class="form-control" placeholder="0.00"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-danger">CYL:</label><input type="text" id="os_cyl" class="form-control" placeholder="0.00"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-danger">AXIS:</label><input type="text" id="os_axis" class="form-control" placeholder="180"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-danger">ADD:</label><input type="text" id="os_add" class="form-control" placeholder="+2.00"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-danger">VA:</label><input type="text" id="os_va" class="form-control" placeholder="6/6"></div>
+                                                <div class="col-6 optic-input-group"><label class="text-danger">IOP:</label><input type="text" id="os_iop" class="form-control" placeholder="15"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- الروشتة -->
+                        <div class="card shadow-sm border-0 mb-3">
+                            <div class="card-body py-3">
+                                <div class="section-header m-0 border-0 p-0 mb-2" id="secRxTitle">💊 الروشتة وتحديد جرعات القطرات</div>
+                                <div class="p-3 bg-light rounded mb-2 border">
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold" id="lblMedName">اسم الدواء:*</label>
+                                            <input type="text" id="medName" class="form-control form-control-sm" list="medList" placeholder="اكتب أو اختر دواء...">
+                                            <datalist id="medList"></datalist>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold" id="lblMedEye">العين:*</label>
+                                            <select id="medEye" class="form-select form-select-sm fw-bold">
+                                                <option value="العينين معاً (OU)" id="optMedEyeOU">العينين معاً (OU)</option>
+                                                <option value="العين اليمنى فقط (OD)" id="optMedEyeOD">العين اليمنى (OD)</option>
+                                                <option value="العين اليسرى فقط (OS)" id="optMedEyeOS">العين اليسرى (OS)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold" id="lblMedDose">الجرعة والتكرار:*</label>
+                                            <select id="medDoseSelect" class="form-select form-select-sm">
+                                                <option value="نقطة 3 مرات يومياً">نقطة 3 مرات يومياً</option>
+                                                <option value="نقطة 4 مرات يومياً">نقطة 4 مرات يومياً</option>
+                                                <option value="نقطة مرتين (صباحاً ومساءً)">نقطة مرتين (صباحاً ومساءً)</option>
+                                                <option value="نقطة مرة واحدة قبل النوم">نقطة مرة واحدة قبل النوم</option>
+                                                <option value="نقطة كل ساعتين">نقطة كل ساعتين</option>
+                                                <option value="مسحة مرهم قبل النوم">مسحة مرهم قبل النوم</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold" id="lblMedDur">المدة:*</label>
+                                            <input type="text" id="medDuration" class="form-control form-control-sm" placeholder="أسبوع / 10 أيام...">
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-md-9">
+                                            <label class="form-label small fw-bold" id="lblMedInst">تعليمات خاصة:</label>
+                                            <input type="text" id="medInstructions" class="form-control form-control-sm" placeholder="رج جيداً / فاصل 5 دقائق / بالثلاجة...">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-sm w-100 fw-bold" onclick="addMedication()" id="btnAddMed">➕ إضافة للروشتة</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <table class="table table-sm table-bordered text-center align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th class="text-start" id="thRxMed">الدواء</th>
+                                            <th id="thRxEye">العين</th>
+                                            <th id="thRxDose">الجرعة</th>
+                                            <th id="thRxDur">المدة</th>
+                                            <th id="thRxInst">تعليمات</th>
+                                            <th id="thRxDel">حذف</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="medsTableBody">
+                                        <tr id="emptyMedsRow"><td colspan="7" class="text-muted small">لم يتم إضافة أدوية حتى الآن</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. وضع الفحوصات والأشعة -->
+                    <div id="scansSpecificSection" style="display: none;">
+                        <div class="scan-container-box mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                                <h4 class="fw-bold text-primary m-0" id="hdrScansTitle">🔬 وحدة الفحوصات والأشعة التشخيصية</h4>
+                                <button type="button" class="btn btn-outline-primary fw-bold" onclick="printInvestigationReport()" id="btnPrtScanReport">🖨️ طباعة التقرير الطبي الرسمي</button>
+                            </div>
+
+                            <div class="report-header-preview">
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-md-4"><span class="text-muted d-block small" id="lblPrevPatient">اسم المريض:</span><strong class="fs-6 text-dark" id="hdrPatientNameDisplay">--</strong></div>
+                                    <div class="col-md-2"><span class="text-muted d-block small" id="lblPrevFile">رقم الملف:</span><strong class="fs-6 text-primary" id="hdrFileNoDisplay">--</strong></div>
+                                    <div class="col-md-3"><span class="text-muted d-block small" id="lblPrevDate">تاريخ الفحص:</span><strong class="fs-6 text-dark" id="hdrDateDisplay">--</strong></div>
+                                    <div class="col-md-3"><span class="text-muted d-block small" id="lblPrevDoc">الطبيب الطالب للفحص:</span><strong class="fs-6 text-danger" id="hdrReferringDoctorDisplay">--</strong></div>
+                                </div>
+                            </div>
+
+                            <div class="card p-3 mb-3 bg-light border">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-dark" id="lblScanTypeReq">نوع الفحص المطلوب:*</label>
+                                        <input type="text" id="scanTypeName" class="form-control fw-bold text-primary" placeholder="أشعة مقطعية OCT Macula / Pentacam">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-primary" id="lblScanTargetEye">العين المفحوصة (Target Eye):*</label>
+                                        <select id="scanTargetEye" class="form-select fw-bold border-primary">
+                                            <option value="العينين معاً (OU)">العينين معاً (Both Eyes - OU)</option>
+                                            <option value="العين اليمنى فقط (OD)">العين اليمنى فقط (Right - OD)</option>
+                                            <option value="العين اليسرى فقط (OS)">العين اليسرى فقط (Left - OS)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-dark" id="lblScanReqDoc">اسم الطبيب الطالب للفحص:*</label>
+                                        <input type="text" id="scanReferringDocInput" class="form-control fw-bold" placeholder="د. فلان الفلاني" oninput="document.getElementById('hdrReferringDoctorDisplay').innerText = this.value || '--'">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark fs-6" id="lblScanFindingsTitle">التقرير الطبي ونتائج الفحص (Investigation Findings & Impression):*</label>
+                                <textarea id="scanFindingsReport" class="form-control" rows="6" style="font-size: 1.05rem; line-height: 1.6;" placeholder="اكتب نتائج الفحص والقياسات والملاحظات الإكلينيكية هنا..."></textarea>
+                            </div>
+
+                            <div class="p-3 bg-light border rounded">
+                                <label class="form-label small fw-bold text-primary" id="lblScanAttTitle">📎 إرفاق ملف الفحص / صور الأشعة المسحوبة من الجهاز:</label>
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-md-8">
+                                        <input type="file" id="scanAttachmentFile" class="form-control" accept="image/*,application/pdf">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted" id="lblScanAttHint">يتم إرفاقها وتوليد سيريال رسمي بملف المريض فورياً</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. وضع الليزر والشبكية -->
+                    <div id="laserSpecificSection" style="display: none;">
+                        <div class="laser-container-box mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-4 text-warning">⚡</span>
+                                    <h4 class="fw-bold text-dark m-0" id="hdrLaserTitle">وحدة الليزر وجراحات الشبكية والياج (Retina & Laser Unit)</h4>
+                                </div>
+                                <button type="button" class="btn btn-outline-warning text-dark fw-bold" onclick="printLaserReport()" id="btnPrtLaserReport">🖨️ طباعة تقرير جلسة الليزر</button>
+                            </div>
+
+                            <div class="laser-header-box mb-3">
+                                <div class="row g-2">
+                                    <div class="col-md-3"><strong>المريض:</strong> <span id="laserPatientDisplay">--</span></div>
+                                    <div class="col-md-2"><strong>الملف:</strong> <span id="laserFileDisplay">--</span></div>
+                                    <div class="col-md-3"><strong>التاريخ:</strong> <span id="laserDateDisplay">--</span></div>
+                                    <div class="col-md-4"><strong>الطبيب المعالج:</strong> <span id="laserDoctorDisplay">--</span></div>
+                                </div>
+                            </div>
+
+                            <div class="card p-3 mb-3 bg-light border">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-dark" id="lblLaserProcType">نوع جلسة الليزر (Laser Procedure):*</label>
+                                        <select id="laserProcedureType" class="form-select fw-bold text-danger">
+                                            <option value="YAG Laser Capsulotomy (مسح عدسة خلفية)">YAG Laser Capsulotomy (مسح عدسة خلفية)</option>
+                                            <option value="Argon Laser PRP (ليزر شبكية لمرضى السكر)">Argon Laser PRP (ليزر شبكية كامل PRP)</option>
+                                            <option value="Focal / Grid Laser (ليزر ارجون موضعي)">Focal / Grid Laser (ليزر موضعي)</option>
+                                            <option value="YAG Peripheral Iridotomy (PI - مياه زرقاء)">YAG Peripheral Iridotomy (PI - خزامة قزحية)</option>
+                                            <option value="Selective Laser Trabeculoplasty (SLT)">Selective Laser Trabeculoplasty (SLT)</option>
+                                            <option value="Laser Barrage for Retinal Tear (تثبيت قطع شبكية)">Laser Barrage for Retinal Tear (تثبيت تمزق شبكية)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-danger" id="lblLaserTargetEye">العين المعالجة بالليزر (Treated Eye):*</label>
+                                        <select id="laserTargetEye" class="form-select fw-bold border-danger">
+                                            <option value="العين اليمنى فقط (Right - OD)">العين اليمنى فقط (Right - OD)</option>
+                                            <option value="العين اليسرى فقط (Left - OS)">العين اليسرى فقط (Left - OS)</option>
+                                            <option value="العينين معاً (Both Eyes - OU)">العينين معاً (Both Eyes - OU)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-dark" id="lblLaserDoc">الطبيب المحول / المعالج:*</label>
+                                        <input type="text" id="laserReferringDocInput" class="form-control fw-bold" placeholder="د. فلان الفلاني">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card p-3 mb-3 bg-white border">
+                                <h6 class="fw-bold text-primary border-bottom pb-2" id="lblLaserParamsTitle">⚡ المعايير الفنية لجلسة الليزر (Laser Parameters):</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblLaserEnergy">مستوى الطاقة (Energy / Power):</label>
+                                        <input type="text" id="laserEnergy" class="form-control text-center fw-bold" placeholder="1.8 mJ / 250 mW">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblLaserShots">عدد الطلقات / النبضات (Spots / Shots):</label>
+                                        <input type="text" id="laserShots" class="form-control text-center fw-bold" placeholder="25 shots / 450 spots">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblLaserSpotSize">حجم البقعة (Spot Size µm):</label>
+                                        <input type="text" id="laserSpotSize" class="form-control text-center" placeholder="200 µm">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" id="lblLaserPostIOP">ضغط العين بعد الليزر (Post-Laser IOP):</label>
+                                        <input type="text" id="laserPostIOP" class="form-control text-center fw-bold text-success" placeholder="14 mmHg">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark fs-6" id="lblLaserNotesTitle">تقرير الجلسة وتوصيات ما بعد الليزر:*</label>
+                                <textarea id="laserOperativeNotes" class="form-control" rows="4" placeholder="تم إجراء الجلسة بنجاح، يُوصى باستخدام قطرة بريدنيزولون + خافض للضغط لمدة أسبوع، مع فحص قاع عين بعد أسبوعين..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. وضع العمليات الجراحية المتقدم -->
+                    <div id="surgerySpecificSection" style="display: none;">
+                        <div class="surgery-container-box mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-4 text-success">🏥</span>
+                                    <h4 class="fw-bold text-dark m-0" id="hdrSurgeryTitle">جناح العمليات الجراحية (Ophthalmic OR Suite)</h4>
+                                </div>
+                                <button type="button" class="btn btn-outline-success fw-bold" onclick="printSurgeryReport()" id="btnPrtSurgReport">🖨️ طباعة التقرير الجراحي الرسمي</button>
+                            </div>
+
+                            <div class="surgery-header-box mb-3">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <span class="text-muted small" id="lblPrevSurgPatient">المريض:</span> <strong class="fs-6 text-dark" id="surgPatientDisplay">--</strong>
+                                        <span class="mx-2">|</span>
+                                        <span class="text-muted small" id="lblPrevSurgFile">الملف:</span> <strong class="fs-6 text-primary" id="surgFileDisplay">--</strong>
+                                        <span class="mx-2">|</span>
+                                        <span class="text-muted small" id="lblPrevSurgDate">التاريخ:</span> <strong class="fs-6 text-dark" id="surgDateDisplay">--</strong>
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button type="button" id="btnStartSurgeryTimer" class="btn btn-success fw-bold px-3 py-1 shadow-sm" onclick="startSurgerySession()">▶️ بدء العملية الجراحية</button>
+                                        <span id="surgeryTimerBadge" class="badge bg-dark timer-badge text-warning border border-secondary">00:00:00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card p-3 mb-3 bg-light border">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-success" id="lblSurgBookedProc">العملية المسجلة من استقبال العمليات:*</label>
+                                        <input type="text" id="surgProcedureInput" class="form-control fw-bold text-dark fs-6 bg-white" placeholder="اسم العملية المسجلة بالاستقبال...">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-danger" id="lblSurgTargetEye">العين المقررة للجراحة:*</label>
+                                        <input type="text" id="surgTargetEyeText" class="form-control fw-bold text-danger text-center fs-6 bg-white" readonly placeholder="العين المقررة">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-dark" id="lblSurgAnesth">نوع التخدير:*</label>
+                                        <select id="surgAnesthesia" class="form-select fw-bold">
+                                            <option value="موضعي / قطرات (Topical)" id="optTopical">موضعي قطرات (Topical)</option>
+                                            <option value="موضعي حقن حول المقلة (Peribulbar Block)" id="optPeribulbar">موضعي حقن (Peribulbar Block)</option>
+                                            <option value="تخدير كلي / عام (General Anesthesia)" id="optGeneralAnesth">تخدير كلي (General)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card p-3 mb-3 bg-white border">
+                                <h6 class="fw-bold text-primary border-bottom pb-2 mb-2" id="lblSurgTeamTitle">👥 الفريق الجراحي والتمريض المساعد (Surgical Team):</h6>
+                                <div class="row g-2">
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-dark" id="lblLeadSurgeon">الجراح الرئيسي:*</label>
+                                        <input type="text" id="surgDoctorDisplayInput" class="form-control form-control-sm fw-bold text-primary">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-dark" id="lblAssistantSurgeon">مساعد الجراح:</label>
+                                        <input type="text" id="surgAssistantInput" class="form-control form-control-sm" placeholder="د. فلان الفلاني">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-dark" id="lblAnesthetist">طبيب التخدير:</label>
+                                        <input type="text" id="surgAnesthetistInput" class="form-control form-control-sm" placeholder="د. استشاري التخدير">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-dark" id="lblScrubNurse">تمريض العمليات والتعقيم:*</label>
+                                        <input type="text" id="surgNurseInput" class="form-control form-control-sm" placeholder="اسم ممرض/ة العمليات">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card p-3 mb-3 bg-white border">
+                                <h6 class="fw-bold text-success border-bottom pb-2" id="lblSurgIolTitle">🔍 بيانات العدسة المزروعة داخل العين (IOL Implantation Details):</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" id="lblIolModel">نوع وموديل العدسة (IOL Model / Make):</label>
+                                        <input type="text" id="surgIolModel" class="form-control form-control-sm" placeholder="e.g. Alcon AcrySof IQ / Johnson & Johnson">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" id="lblIolPower">قوة العدسة المزروعة (IOL Power - Diopters):</label>
+                                        <input type="text" id="surgIolPower" class="form-control form-control-sm fw-bold text-primary text-center" placeholder="+21.50 D">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" id="lblIolSerial">الرقم التسلسلي للعدسة (Serial / Lot No):</label>
+                                        <input type="text" id="surgIolSerial" class="form-control form-control-sm" placeholder="SN: 89457219">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark fs-6" id="lblSurgNotesTitle">التقرير الجراحي وملاحظات وخطوات العملية (Operative Notes & Steps):*</label>
+                                <textarea id="surgOperativeNotes" class="form-control" rows="4" style="line-height: 1.6;" placeholder="تم إجراء الجراحة بنجاح، تم استحلاب العدسة بالفاكو وزرع العدسة داخل المحفظة في وضع سليم، مع غلق الشق الجراحي بدون غرز..."></textarea>
+                            </div>
+
+                            <div class="card p-3 mb-3 bg-light border">
+                                <h6 class="fw-bold text-dark border-bottom pb-2" id="lblPostOpRxTitle">💊 علاج وروشتة ما بعد العملية (Post-Operative Prescription):</h6>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-5">
+                                        <label class="form-label small fw-bold" id="lblSurgMedName">اسم القطرة / العلاج:*</label>
+                                        <input type="text" id="surgMedName" class="form-control form-control-sm" placeholder="مثلاً: Vigamox / Pred Forte / Tobradex">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" id="lblSurgMedDose">الجرعة والتكرار:*</label>
+                                        <input type="text" id="surgMedDose" class="form-control form-control-sm" placeholder="نقطة كل ساعتين / 4 مرات يومياً">
+                                    </div>
+                                    <div class="col-md-3 align-self-end">
+                                        <button type="button" class="btn btn-primary btn-sm w-100 fw-bold" onclick="addSurgeryMedication()" id="btnAddSurgMed">➕ إضافة للعلاج</button>
+                                    </div>
+                                </div>
+                                <table class="table table-sm table-bordered text-center align-middle bg-white mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th id="thSurgMedName">العلاج / القطرة</th>
+                                            <th id="thSurgMedDose">الجرعة والتعليمات</th>
+                                            <th id="thSurgMedDel">حذف</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="surgMedsTableBody">
+                                        <tr><td colspan="4" class="text-muted small" id="lblEmptySurgMeds">لم يتم إضافة أدوية لعلاج ما بعد الجراحة حتى الآن</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- أزرار الحفظ -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                        <button type="button" class="btn btn-outline-danger fw-bold px-4 py-2" onclick="dismissCurrentPatient()" id="btnDismiss">🚫 إنهاء وإخفاء من الطابور (Dismiss)</button>
+                        
+                        <div id="divSurgeryActions" style="display: none;">
+                            <button type="button" class="btn btn-success fw-bold px-5 py-2 fs-6 shadow-sm" onclick="finishSurgeryOperation()" id="btnFinishSurgery">🏁 إنهاء العملية واعتماد التقرير وغلق الملف</button>
+                        </div>
+
+                        <div id="divGeneralActions">
+                            <button type="button" class="btn btn-primary fw-bold px-5 py-2 fs-6 shadow-sm" onclick="finishExamination()" id="btnFinishExam">✔️ اعتماد وحفظ الزيارة والملف</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- نافذة التحويلات -->
+    <div class="modal fade" id="referralActionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="refModalTitle">📋 تحرير خطاب / تحويل طبي</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="p-2 mb-3 bg-light border rounded">
+                        <strong>المريض:</strong> <span id="refPatientDisplay" class="text-primary fw-bold">--</span> | <strong>الملف:</strong> <span id="refFileDisplay" class="fw-bold">--</span>
+                    </div>
+
+                    <div id="doctorReferralFields" style="display: none;" class="mb-3">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark" id="lblRefDocName">اسم الطبيب المحال إليه (Doctor Name):*</label>
+                                <input type="text" id="refDoctorNameInput" class="form-control fw-bold" placeholder="د. أحمد الشريف / Dr. Ahmed">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark" id="lblRefDocSpec">التخصص الطبي (Medical Specialty):*</label>
+                                <input type="text" id="refDoctorSpecialtyInput" class="form-control fw-bold" list="specialtiesPredefinedList" placeholder="اختر التخصص من القائمة...">
+                                <datalist id="specialtiesPredefinedList">
+                                    <option value="Endocrinology & Diabetes | استشاري الباطنة والسكر والغدد الصماء">
+                                    <option value="Cardiology & Vascular Medicine | استشاري أمراض القلب والأوعية الدموية">
+                                    <option value="Neurology & Neurosurgery | استشاري أمراض وجراحة المخ والأعصاب">
+                                    <option value="Rheumatology & Autoimmune Diseases | استشاري الروماتيزم والمناعة">
+                                    <option value="Nephrology & Renal Medicine | استشاري أمراض الكلى">
+                                    <option value="Pediatrics & Neonatology | استشاري طب الأطفال وحديثي الولادة">
+                                    <option value="Oculoplastic & Orbit Surgery | استشاري جراحة تجميل العيون والحجاج">
+                                    <option value="Vitreoretinal Surgery | استشاري جراحة الشبكية والجسم الزجاجي">
+                                    <option value="Cornea & Refractive Surgery | استشاري القرنية وتصحيح الإبصار">
+                                    <option value="Glaucoma Subspecialist | استشاري المياه الزرقاء وضغط العين">
+                                    <option value="Pediatric Ophthalmology & Strabismus | استشاري عيون الأطفال والحول">
+                                    <option value="Neuro-Ophthalmology | استشاري أعصاب العيون">
+                                </datalist>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="generalTargetField">
+                        <label class="form-label small fw-bold" id="refTargetLabel">المطلوب (اختر من القائمة المزدوجة):*</label>
+                        <input type="text" id="refTargetInput" class="form-control fw-bold" placeholder="...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-primary" id="lblRefDiagnosis">التشخيص الطبي لحالة المريض (Clinical Diagnosis):*</label>
+                        <input type="text" id="refDiagnosisInput" class="form-control fw-bold" placeholder="e.g. Proliferative Diabetic Retinopathy | اعتلال الشبكية السكري">
+                    </div>
+
+                    <div class="row g-2 mb-3" id="refEyeRow">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold" id="lblRefEyeTarget">العين المعنية:*</label>
+                            <select id="refEyeSelect" class="form-select form-select-sm fw-bold">
+                                <option value="العينين معاً (OU)">العينين معاً (Both Eyes - OU)</option>
+                                <option value="العين اليمنى فقط (OD)">العين اليمنى فقط (Right - OD)</option>
+                                <option value="العين اليسرى فقط (OS)">العين اليسرى فقط (Left - OS)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold" id="lblRefAnesthType">نوع التخدير المقترح (للعمليات):</label>
+                            <select id="refAnesthesiaSelect" class="form-select form-select-sm">
+                                <option value="موضعي / قطرات (Topical)">موضعي / قطرات (Topical)</option>
+                                <option value="موضعي حقن (Peribulbar Block)">موضعي حقن (Peribulbar)</option>
+                                <option value="كلي / عام (General Anesthesia)">كلي / عام (General)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold" id="refDetailsLabel">التفاصيل وملاحظات الإحالة وسبب الاستشارة:*</label>
+                        <textarea id="refDetailsInput" class="form-control" rows="4" placeholder="اكتب التقرير الطبي وسبب الاستشارة..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCancelModal">إلغاء</button>
+                    <button type="button" class="btn btn-primary fw-bold px-4" onclick="executePrintReferral()" id="btnPrintModal">🖨️ طباعة الخطاب الرسمي فوراً</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الفوتر الرسمي -->
+    <footer class="begol-footer">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong class="text-dark">👁️ نظام بيجول (Begol Eye System)</strong>
+                <span class="mx-1">•</span>
+                <span id="ftCenterName">مركز حبشي التخصصي للعيون</span>
+                <span class="mx-1">•</span>
+                <span class="text-muted" id="ftRights">جميع الحقوق محفوظة © 2026</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="me-2" id="ftDevBy">تم التطوير والبرمجة بواسطة:</span>
+                <span class="andy-badge">آندي (Andy)</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- القوائم المنسدلة للتحويلات -->
+    <datalist id="scansPredefinedList">
+        <option value="OCT Macula | أشعة مقطعية على مركز الإبصار والشبكية">
+        <option value="OCT RNFL / ONH | أشعة مقطعية على العصب البصري وأليافه">
+        <option value="OCT Angiography (OCTA) | أشعة مقطعية للأوعية الدموية بدون صبغة">
+        <option value="Fluorescein Angiography (FFA) | تصوير قاع العين بصبغة الفلورسين">
+        <option value="Fundus Photography | تصوير ملون رقمي عالي الدقة لقاع العين">
+        <option value="Pentacam Corneal Topography | تصوير بنتاكام لتضاريس وسمك القرنية">
+        <option value="Anterior Segment OCT (AS-OCT) | أشعة مقطعية على القرنية والحجرة الأمامية">
+        <option value="Specular Microscopy | فحص خلايا بطانة القرنية">
+        <option value="IOL Master / Optical Biometry | حساب مقاس وقوة العدسة بالليزر">
+        <option value="B-Scan Ocular Ultrasound | سونار وموجات فوق صوتية على الشبكية">
+        <option value="Visual Field (Perimetry) | تخطيط وفحص مجال الإبصار بالكمبيوتر">
+    </datalist>
+
+    <datalist id="labsPredefinedList">
+        <option value="HbA1c (Glycated Hemoglobin) | سكر تراكمي">
+        <option value="Fasting & 2-Hour Postprandial Blood Sugar | سكر صائم وفاطر">
+        <option value="Complete Blood Count (CBC) | صورة دم كاملة">
+        <option value="Coagulation Profile (PT, PTT, INR) | سيولة وتجلط الدم">
+        <option value="Kidney Function Tests (Creatinine & Urea) | وظائف كلى (بولينا وكرياتينين)">
+        <option value="Liver Function Tests (ALT, AST) | وظائف كبد">
+        <option value="Viral Screen (HBsAg, HCV, HIV) | فحص الفيروسات الكبدية والمناعية">
+        <option value="Lipid Profile (Cholesterol & Triglycerides) | دهون وكوليسترول الدم">
+        <option value="ESR & CRP (Inflammatory Markers) | سرعة الترسيب والبروتين التفاعلي">
+        <option value="HLA-B27 Typing | الفحص الجيني لالتهاب القزحية المتكرر">
+        <option value="HLA-B51 Typing | الفحص الجيني لمرض بهجت (Behcet's)">
+        <option value="ANA & Anti-dsDNA | فحص المناعة الذاتية والذئبة">
+        <option value="Serum ACE Level | إنزيم الساركويدوز">
+        <option value="Toxoplasma IgG & IgM Antibodies | فحص ميكروب القطط للشبكية">
+        <option value="Thyroid Profile (TSH, Free T3, Free T4) | هرمونات الغدة الدرقية لجحوظ العين">
+    </datalist>
+
+    <datalist id="surgeriesPredefinedList">
+        <option value="Phacoemulsification + Foldable IOL Implantation | إزالة مياه بيضاء وزرع عدسة رخوة بالفاكو">
+        <option value="Femto-Cataract (FLACS) + Multifocal IOL | إزالة مياه بيضاء بالفيمتو وزرع عدسة متعددة البؤر">
+        <option value="Toric IOL Implantation | زرع عدسة توريك لتصحيح الاستجماتيزم">
+        <option value="Secondary Scleral-Fixated IOL (Yamane) | زرع عدسة ثانوية وتثبيت صلبة (ياماني)">
+        <option value="IOL Exchange / Repositioning | استبدال أو تعديل وضع عدسة مزروعة">
+        <option value="Femto-LASIK (Custom Q) | فيمتو ليزك لتصحيح الإبصار (بصمة العين)">
+        <option value="Femto-SMILE | فيمتو سمايل لتصحيح قصر النظر والاستجماتيزم">
+        <option value="Photorefractive Keratectomy (PRK) | ليزر سطحي للقرنية">
+        <option value="Corneal Cross-Linking (CXL) | تثبيت القرنية المخروطية بالأشعة والريبوفلافين">
+        <option value="Intracorneal Ring Segments (ICRS) | زراعة حلقات القرنية بالفيمتوليزر">
+        <option value="Phakic ICL Implantation | زرع عدسات تصحيح قصر النظر الشديد داخل العين (ICL)">
+        <option value="Penetrating Keratoplasty (PKP) | ترقيع قرنية كلي نافذ (زراعة قرنية)">
+        <option value="Endothelial Keratoplasty (DMEK / DSAEK) | زراعة بطانة القرنية الطبقية">
+        <option value="Pars Plana Vitrectomy (PPV) 23G/25G | استئصال الجسم الزجاجي خلف القزحية">
+        <option value="PPV + Endolaser + Silicone Oil Injection | استئصال زجاجي وتثبيت شبكية وحقن سيليكون">
+        <option value="PPV + Gas Tamponade (C3F8) | استئصال زجاجي وحقن غاز لانفصال الشبكية">
+        <option value="Scleral Buckling Procedure | حزام صلبة العين لعلاج انفصال الشبكية">
+        <option value="PPV + ILM / ERM Peeling | تقشير أغشية الشبكية لعلاج ثقب مركز الإبصار">
+        <option value="Silicone Oil Removal (SOR) | عملية إزالة وتفريغ زيت السيليكون">
+        <option value="Intravitreal Anti-VEGF Injection | حقن مادة مثبطة للنمو الوعائي داخل العين">
+        <option value="Trabeculectomy + Mitomycin C (MMC) | استئصال جراحي لترشيح سائل العين">
+        <option value="Ahmed Glaucoma Valve Implantation | زراعة صمام أحمد للمياه الزرقاء">
+        <option value="Strabismus Surgery (Recession & Resection) | عملية إصلاح الحول وتقويم عضلات العين">
+        <option value="Pediatric Cataract + Capsulotomy | إزالة مياه بيضاء للأطفال مع شق محفظة">
+        <option value="Dacryocystorhinostomy (DCR) | مجرى دمع جديد وتوصيل كيس الدمع بالأنف">
+        <option value="Blepharoplasty (Upper / Lower) | تجميل واستئصال ترهلات الجفون">
+        <option value="Ptosis Correction (Levator Resection) | تصليح ارتخاء وسقوط الجفن">
+    </datalist>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentSelectedDepartment = 'عيادة الكشف';
+        let currentQueueTab = 'waiting';
+        let selectedPatientId = 0;
+        let selectedQueueId = 0;
+        let selectedPatientName = '';
+        let selectedPatientDetails = '';
+        let selectedDoctorName = '';
+        let medications = [];
+        let surgeryMedications = [];
+        let userRole = 'Consultant';
+        let userFullName = '';
+        let doctorScope = 'كشوفات وفحوصات';
+        let currentLanguage = localStorage.getItem('begol_lang') || 'ar';
+        let activeReferralType = 'scans';
+        let refModalInstance = null;
+        let queueDataStore = [];
+
+        // متغيرات مؤقت الجراحة
+        let surgeryStartTime = null;
+        let surgeryEndTime = null;
+        let surgeryTimerInterval = null;
+        let totalSurgeryElapsedSeconds = 0;
+
+        window.onload = async function() {
+            userFullName = sessionStorage.getItem('fullName') || '';
+            userRole = sessionStorage.getItem('roleName') || 'Consultant';
+            doctorScope = sessionStorage.getItem('doctorScope') || 'كشوفات وفحوصات';
+            refModalInstance = new bootstrap.Modal(document.getElementById('referralActionModal'));
+
+            if (!userFullName) { window.location.href = '/index.html'; return; }
+
+            document.getElementById('lblDoctorBadge').innerText = `👨‍⚕️ ${userFullName} (${userRole})`;
+
+            if (userRole.toLowerCase() === 'admin') {
+                const adminSec = document.getElementById('adminNavSection');
+                adminSec.classList.remove('d-none');
+                adminSec.classList.add('d-flex');
+            }
+
+            const roleLow = userRole.toLowerCase();
+            if (roleLow === 'resident' || roleLow === 'admin') {
+                document.getElementById('prepFilterBox').style.display = 'block';
+                await loadConsultantsForPrep();
+            }
+
+            enforceDoctorScopePermissions();
+            
+            // تطبيق اللغة الشاملة
+            applyLanguage(currentLanguage);
+
+            loadMedicationsList();
+            switchDepartment('عيادة الكشف');
+        };
+
+        function logout() { sessionStorage.clear(); window.location.href = '/index.html'; }
+
+        function enforceDoctorScopePermissions() {
+            const role = userRole.toLowerCase();
+            if (role === 'admin') return;
+
+            if (doctorScope === 'كشوفات فقط') {
+                document.getElementById('btnScansTab').style.display = 'none';
+                document.getElementById('btnLaserTab').style.display = 'none';
+                document.getElementById('btnSurgeryTab').style.display = 'none';
+            } else if (doctorScope === 'فحوصات فقط') {
+                document.getElementById('btnClinicTab').style.display = 'none';
+                document.getElementById('btnSurgeryTab').style.display = 'none';
+                switchDepartment('وحدة الفحوصات');
+            }
+        }
+
+        // ========================================================
+        // محرك الترجمة الآمن والذكي (i18n Engine المستقر الذي لا ينهار أبداً)
+        // ========================================================
+        function toggleLanguage() {
+            currentLanguage = (currentLanguage === 'ar') ? 'en' : 'ar';
+            localStorage.setItem('begol_lang', currentLanguage);
+            applyLanguage(currentLanguage);
+        }
+
+        function applyLanguage(lang) {
+            const isAr = (lang === 'ar');
+            const htmlRoot = document.getElementById('htmlRoot');
+            const bootstrapCss = document.getElementById('bootstrapCss');
+
+            htmlRoot.setAttribute('lang', isAr ? 'ar' : 'en');
+            htmlRoot.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+            bootstrapCss.href = isAr 
+                ? "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css"
+                : "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css";
+
+            // دالة آمنة تمنع توقف الكود إذا كان أي عنصر غير موجود
+            const safeSetText = (id, ar, en) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = isAr ? ar : en;
+            };
+
+            const safeSetPlaceholder = (id, ar, en) => {
+                const el = document.getElementById(id);
+                if (el) el.placeholder = isAr ? ar : en;
+            };
+
+            // 1. الشريط العلوي والتابات
+            safeSetText('btnLangToggle', '🌐 English', '🌐 عربي');
+            safeSetText('navCenterTitle', 'مركز حبشي التخصصي للعيون', 'Habashy Specialized Eye Center');
+            safeSetText('pageTitle', 'مركز حبشي للعيون - نظام بيجول (عيادة الطبيب)', 'Habashy Eye Center - Begol (Doctor Portal)');
+
+            safeSetText('lblTabClinic', 'عيادة الكشف', 'Consultation Clinic');
+            safeSetText('lblTabScans', 'وحدة الفحوصات والأشعة', 'Diagnostic Scans');
+            safeSetText('lblTabLaser', 'وحدة الليزر والشبكية', 'Laser & Retina Unit');
+            safeSetText('lblTabSurgery', 'العمليات الجراحية', 'Surgical Unit (OR)');
+
+            safeSetText('navAdminLink', '⚙️ الإدارة', '⚙️ Admin');
+            safeSetText('navRecLink', '👥 الاستقبال', '👥 Reception');
+            safeSetText('navCallLink', '📞 الكول سنتر', '📞 Call Center');
+            safeSetText('navQueueLink', '📺 الانتظار', '📺 Queue');
+            safeSetText('btnLogout', 'خروج 🚪', 'Logout 🚪');
+
+            // 2. طابور الانتظار
+            safeSetPlaceholder('txtDoctorQuickSearch', '🔍 كود أو اسم المريض...', '🔍 Patient code or name...');
+            safeSetText('btnQuickSearch', 'فتح', 'Open');
+            safeSetText('btnShowWaiting', '⏳ بالانتظار', '⏳ Waiting');
+            safeSetText('btnShowFinished', '✔️ المكتملة (Recall)', '✔️ Finished (Recall)');
+            safeSetText('lblPrepConsultant', 'تحضير حالات استشاري:', 'Prepare Cases for:');
+            safeSetText('lblQueueLoading', 'جاري تحميل قائمة المرضى...', 'Loading patients queue...');
+
+            // 3. أزرار المطبوعات والتحويلات
+            safeSetText('lblDocActions', '📄 المطبوعات والتحويلات:', '📄 Print & Referrals:');
+            safeSetText('btnPrtGlasses', '👓 كشف النظارة', '👓 Glasses Rx');
+            safeSetText('btnPrtRx', '💊 الروشتة', '💊 Prescription');
+            safeSetText('btnRefScans', '🔬 تحويل فحوصات', '🔬 Request Scans');
+            safeSetText('btnRefLabs', '🧪 تحويل تحاليل', '🧪 Request Labs');
+            safeSetText('btnRefDoc', '👨‍⚕️ تحويل لطبيب', '👨‍⚕️ Doctor Referral');
+            safeSetText('btnRefSurg', '🏥 قرار عملية', '🏥 Surgery Order');
+            safeSetText('btnOrdersHist', '📂 سجل الأوامر', '📂 Orders History');
+
+            // 4. التوسيع
+            safeSetText('lblDilationTitle', 'أمر قطرة توسيع الحدقة والتحضير (Dilation Order):', 'Pupil Dilation Order (Dilation):');
+            safeSetText('lblDilationType', 'نوع قطرة التوسيع المطلوبة:*', 'Dilation Drops Type:*');
+            safeSetText('lblDilationEye', 'العين المطلوب توسيعها:*', 'Target Eye:*');
+            safeSetText('optDilOU', 'العينين معاً (Both Eyes - OU)', 'Both Eyes (OU)');
+            safeSetText('optDilOD', 'العين اليمنى فقط (Right - OD)', 'Right Eye (OD)');
+            safeSetText('optDilOS', 'العين اليسرى فقط (Left - OS)', 'Left Eye (OS)');
+            safeSetText('lblPostRefract', 'إعادة مقاس كمبيوتر بعد التوسيع؟', 'Auto-Refract after dilation?');
+            safeSetText('optPostNo', 'لا، فحص قاع عين فقط', 'No, Fundus only');
+            safeSetText('optPostYes', 'نعم، مطلوب كشف كمبيوتر بعد التوسيع', 'Yes, Post-dilation Refraction');
+            safeSetText('btnSendDil', '💧 إرسال للتمريض', '💧 Send to Nurse');
+
+            // 5. الفحص والتشخيص
+            safeSetText('secExamTitle', '🔍 الفحص الإكلينيكي والتشخيص', '🔍 Clinical Examination & Diagnosis');
+            safeSetText('lblComplaint', 'شكوى المريض (Chief Complaint):', 'Chief Complaint:');
+            safeSetPlaceholder('txtComplaint', 'أعراض المريض، مدة الشكوى...', 'Patient symptoms, onset, duration...');
+            safeSetText('lblFindings', 'فحص المصباح الشقي (Slit Lamp / Findings):', 'Slit Lamp & Examination Findings:');
+            safeSetPlaceholder('txtFindings', 'القرنية، العدسة، الحجرة الأمامية، قاع العين...', 'Cornea, lens, anterior chamber, fundus...');
+            safeSetText('lblDiagnosis', 'التشخيص (Diagnosis):', 'Clinical Diagnosis:');
+            safeSetPlaceholder('txtDiagnosis', 'التشخيص النهائي أو المبدئي...', 'Impression / Clinical Diagnosis...');
+
+            // 6. مقاسات النظارة
+            safeSetText('secGlassesTitle', '👓 مقاسات النظارة والفحص البصري (Refraction)', '👓 Refraction & Glasses Prescription');
+            safeSetText('lblRightEyeCard', '👁️ العين اليمنى (Right / OD)', '👁️ Right Eye (OD)');
+            safeSetText('lblLeftEyeCard', '👁️ العين اليسرى (Left / OS)', '👁️ Left Eye (OS)');
+            safeSetText('lblLensType', 'نوع العدسة', 'Lens Type');
+            safeSetText('optLens1', 'مسافات فقط', 'Single Vision (Distance)');
+            safeSetText('optLens2', 'قراءة فقط', 'Reading Only');
+            safeSetText('optLens3', 'ثنائية البؤرة', 'Bifocal');
+            safeSetText('optLens4', 'بروجريسيف', 'Progressive');
+
+            // 7. الروشتة
+            safeSetText('secRxTitle', '💊 الروشتة وتحديد جرعات القطرات', '💊 Prescription & Medication Doses');
+            safeSetText('lblMedName', 'اسم الدواء:*', 'Medication Name:*');
+            safeSetPlaceholder('medName', 'اكتب أو اختر دواء...', 'Type or select medication...');
+            safeSetText('lblMedEye', 'العين:*', 'Eye:*');
+            safeSetText('optMedEyeOU', 'العينين معاً (OU)', 'Both Eyes (OU)');
+            safeSetText('optMedEyeOD', 'العين اليمنى (OD)', 'Right Eye (OD)');
+            safeSetText('optMedEyeOS', 'العين اليسرى (OS)', 'Left Eye (OS)');
+            safeSetText('lblMedDose', 'الجرعة والتكرار:*', 'Dose & Frequency:*');
+            safeSetText('lblMedDur', 'المدة:*', 'Duration:*');
+            safeSetPlaceholder('medDuration', 'أسبوع / 10 أيام...', 'e.g. 1 week / 10 days');
+            safeSetText('lblMedInst', 'تعليمات خاصة:', 'Special Instructions:');
+            safeSetPlaceholder('medInstructions', 'رج جيداً / فاصل 5 دقائق / بالثلاجة...', 'Shake well, 5 min interval, fridge...');
+            safeSetText('btnAddMed', '➕ إضافة للروشتة', '➕ Add to Rx');
+            safeSetText('thRxMed', 'الدواء', 'Medication');
+            safeSetText('thRxEye', 'العين', 'Eye');
+            safeSetText('thRxDose', 'الجرعة', 'Dose');
+            safeSetText('thRxDur', 'المدة', 'Duration');
+            safeSetText('thRxInst', 'تعليمات', 'Instructions');
+            safeSetText('thRxDel', 'حذف', 'Del');
+
+            // 8. الفحوصات
+            safeSetText('hdrScansTitle', '🔬 وحدة الفحوصات والأشعة التشخيصية', '🔬 Diagnostic Scans & Imaging Unit');
+            safeSetText('btnPrtScanReport', '🖨️ طباعة التقرير الطبي الرسمي', '🖨️ Print Official Scan Report');
+            safeSetText('lblPrevPatient', 'اسم المريض:', 'Patient Name:');
+            safeSetText('lblPrevFile', 'رقم الملف:', 'File No:');
+            safeSetText('lblPrevDate', 'تاريخ الفحص:', 'Scan Date:');
+            safeSetText('lblPrevDoc', 'الطبيب الطالب للفحص:', 'Referring Doctor:');
+            safeSetText('lblScanTypeReq', 'نوع الفحص المطلوب:*', 'Requested Scan:*');
+            safeSetText('lblScanTargetEye', 'العين المفحوصة (Target Eye):*', 'Target Eye:*');
+            safeSetText('lblScanReqDoc', 'اسم الطبيب الطالب للفحص:*', 'Referring Doctor:*');
+            safeSetText('lblScanFindingsTitle', 'التقرير الطبي ونتائج الفحص (Investigation Findings & Impression):*', 'Investigation Findings & Clinical Impression:*');
+            safeSetText('lblScanAttTitle', '📎 إرفاق ملف الفحص / صور الأشعة المسحوبة من الجهاز:', '📎 Attach Scan Image / DICOM / PDF:');
+            safeSetText('lblScanAttHint', 'يتم إرفاقها وتوليد سيريال رسمي بملف المريض فورياً', 'Auto-attached with official serial number');
+
+            // 9. الليزر
+            safeSetText('hdrLaserTitle', 'وحدة الليزر وجراحات الشبكية والياج (Retina & Laser Unit)', 'Retina & Laser Surgery Unit (Laser Suite)');
+            safeSetText('btnPrtLaserReport', '🖨️ طباعة تقرير جلسة الليزر', '🖨️ Print Laser Session Report');
+            safeSetText('lblLaserProcType', 'نوع جلسة الليزر (Laser Procedure):*', 'Laser Procedure:*');
+            safeSetText('lblLaserTargetEye', 'العين المعالجة بالليزر (Treated Eye):*', 'Treated Eye:*');
+            safeSetText('lblLaserDoc', 'الطبيب المحول / المعالج:*', 'Laser Surgeon / Treating Doc:*');
+            safeSetText('lblLaserParamsTitle', '⚡ المعايير الفنية لجلسة الليزر (Laser Parameters):', '⚡ Laser Technical Parameters:');
+            safeSetText('lblLaserEnergy', 'مستوى الطاقة (Energy / Power):', 'Energy / Power:');
+            safeSetText('lblLaserShots', 'عدد الطلقات / النبضات (Spots / Shots):', 'Shots / Spots:');
+            safeSetText('lblLaserSpotSize', 'حجم البقعة (Spot Size µm):', 'Spot Size (µm):');
+            safeSetText('lblLaserPostIOP', 'ضغط العين بعد الليزر (Post-Laser IOP):', 'Post-Laser IOP:');
+            safeSetText('lblLaserNotesTitle', 'تقرير الجلسة وتوصيات ما بعد الليزر:*', 'Operative Notes & Post-Laser Regimen:*');
+
+            // 10. العمليات (OR Suite الكاملة)
+            safeSetText('hdrSurgeryTitle', 'جناح العمليات الجراحية (Ophthalmic OR Suite)', 'Advanced Ophthalmic Surgical Suite (OR)');
+            safeSetText('btnPrtSurgReport', '🖨️ طباعة التقرير الجراحي الرسمي', '🖨️ Print Operative Report');
+            safeSetText('lblPrevSurgPatient', 'المريض:', 'Patient:');
+            safeSetText('lblPrevSurgFile', 'الملف:', 'File:');
+            safeSetText('lblPrevSurgDate', 'التاريخ:', 'Date:');
+            safeSetText('btnStartSurgeryTimer', '▶️ بدء العملية الجراحية', '▶️ Start Surgery');
+            safeSetText('lblSurgBookedProc', 'العملية المسجلة من استقبال العمليات:*', 'Surgery Booked by Reception:*');
+            safeSetPlaceholder('surgProcedureInput', 'اسم العملية المسجلة بالاستقبال...', 'Surgery Name from Reception...');
+            safeSetText('lblSurgTargetEye', 'العين المقررة للجراحة:*', 'Target Eye:*');
+            safeSetPlaceholder('surgTargetEyeText', 'العين المقررة', 'Target Eye');
+            safeSetText('lblSurgAnesth', 'نوع التخدير:*', 'Anesthesia Type:*');
+            safeSetText('optTopical', 'موضعي قطرات (Topical)', 'Topical Anesthesia');
+            safeSetText('optPeribulbar', 'موضعي حقن (Peribulbar Block)', 'Peribulbar Block');
+            safeSetText('optGeneralAnesth', 'تخدير كلي (General)', 'General Anesthesia');
+
+            safeSetText('lblSurgTeamTitle', '👥 الفريق الجراحي والتمريض المساعد (Surgical Team):', '👥 Surgical & Nursing Team:');
+            safeSetText('lblLeadSurgeon', 'الجراح الرئيسي:*', 'Lead Surgeon:*');
+            safeSetText('lblAssistantSurgeon', 'مساعد الجراح:', 'Assistant Surgeon:');
+            safeSetText('lblAnesthetist', 'طبيب التخدير:', 'Anesthesiologist:');
+            safeSetText('lblScrubNurse', 'تمريض العمليات والتعقيم:*', 'Scrub & Circulating Nurse:*');
+
+            safeSetText('lblSurgIolTitle', '🔍 بيانات العدسة المزروعة داخل العين (IOL Implantation Details):', '🔍 Intraocular Lens (IOL) Details:');
+            safeSetText('lblIolModel', 'نوع وموديل العدسة (IOL Model / Make):', 'IOL Make & Model:');
+            safeSetText('lblIolPower', 'قوة العدسة المزروعة (IOL Power - Diopters):', 'IOL Power (Diopters):');
+            safeSetText('lblIolSerial', 'الرقم التسلسلي للعدسة (Serial / Lot No):', 'IOL Serial / Lot No:');
+            safeSetText('lblSurgNotesTitle', 'التقرير الجراحي وملاحظات وخطوات العملية (Operative Notes & Steps):*', 'Operative Notes & Surgical Steps:*');
+            safeSetPlaceholder('surgOperativeNotes', 'تم إجراء الجراحة بنجاح، تم استحلاب العدسة بالفاكو وزرع العدسة داخل المحفظة في وضع سليم، مع غلق الشق الجراحي بدون غرز...', 'Procedure completed successfully without complications...');
+
+            safeSetText('lblPostOpRxTitle', '💊 علاج وروشتة ما بعد العملية (Post-Operative Prescription):', '💊 Post-Op Medications & Regimen:');
+            safeSetText('lblSurgMedName', 'اسم القطرة / العلاج:*', 'Eye Drop / Medication Name:*');
+            safeSetPlaceholder('surgMedName', 'مثلاً: Vigamox / Pred Forte / Tobradex', 'e.g. Vigamox / Pred Forte');
+            safeSetText('lblSurgMedDose', 'الجرعة والتكرار:*', 'Dose & Instructions:*');
+            safeSetPlaceholder('surgMedDose', 'نقطة كل ساعتين / 4 مرات يومياً', 'e.g. 1 drop every 2 hours');
+            safeSetText('btnAddSurgMed', '➕ إضافة للعلاج', '➕ Add Medication');
+            safeSetText('thSurgMedName', 'العلاج / القطرة', 'Medication');
+            safeSetText('thSurgMedDose', 'الجرعة والتعليمات', 'Instructions');
+            safeSetText('thSurgMedDel', 'حذف', 'Del');
+            safeSetText('lblEmptySurgMeds', 'لم يتم إضافة أدوية لعلاج ما بعد الجراحة حتى الآن', 'No post-op medications added yet');
+
+            // 11. أزرار الحفظ العامة
+            safeSetText('btnFinishSurgery', '🏁 إنهاء العملية واعتماد التقرير وغلق الملف', '🏁 Finish Surgery & Close File');
+            safeSetText('btnDismiss', '🚫 إنهاء وإخفاء من الطابور (Dismiss)', '🚫 Dismiss from Queue');
+            safeSetText('btnFinishExam', '✔️ اعتماد وحفظ الزيارة والملف', '✔️ Complete Visit & Save');
+
+            // 12. الفوتر
+            safeSetText('ftCenterName', 'مركز حبشي التخصصي للعيون', 'Habashy Specialized Eye Center');
+            safeSetText('ftRights', 'جميع الحقوق محفوظة © 2026', 'All Rights Reserved © 2026');
+            safeSetText('ftDevBy', 'تم التطوير والبرمجة بواسطة:', 'Developed & Engineered by:');
+        }
+
+        function switchDepartment(dept) {
+            currentSelectedDepartment = dept;
+            document.getElementById('btnClinicTab').classList.toggle('active', dept === 'عيادة الكشف');
+            document.getElementById('btnScansTab').classList.toggle('active', dept === 'وحدة الفحوصات');
+            document.getElementById('btnLaserTab').classList.toggle('active', dept === 'وحدة الليزر');
+            document.getElementById('btnSurgeryTab').classList.toggle('active', dept === 'وحدة العمليات');
+            
+            const qTitle = document.getElementById('queueSectionTitle');
+            if (qTitle) qTitle.innerText = currentLanguage === 'ar' ? `⏳ طابور: ${dept}` : `⏳ Queue: ${dept}`;
+
+            const clinicBox = document.getElementById('clinicSpecificSection');
+            const scansBox = document.getElementById('scansSpecificSection');
+            const laserBox = document.getElementById('laserSpecificSection');
+            const surgBox = document.getElementById('surgerySpecificSection');
+
+            clinicBox.style.setProperty('display', (dept === 'عيادة الكشف') ? 'block' : 'none', 'important');
+            scansBox.style.setProperty('display', (dept === 'وحدة الفحوصات') ? 'block' : 'none', 'important');
+            laserBox.style.setProperty('display', (dept === 'وحدة الليزر') ? 'block' : 'none', 'important');
+            surgBox.style.setProperty('display', (dept === 'وحدة العمليات') ? 'block' : 'none', 'important');
+
+            const isSurgery = (dept === 'وحدة العمليات');
+            document.getElementById('divSurgeryActions').style.display = isSurgery ? 'block' : 'none';
+            document.getElementById('divGeneralActions').style.display = isSurgery ? 'none' : 'block';
+
+            const sysTitle = document.getElementById('navSystemTitle');
+            if (sysTitle) sysTitle.innerText = currentLanguage === 'ar' ? `نظام بيجول • ${dept}` : `Begol System • ${dept}`;
+
+            resetViews();
+            loadCurrentQueueView();
+        }
+
+        async function loadMedicationsList() {
+            try {
+                const res = await fetch('/api/medications');
+                const list = await res.json();
+                const datalist = document.getElementById('medList');
+                datalist.innerHTML = '';
+                list.forEach(m => {
+                    datalist.innerHTML += `<option value="${m.name}">${m.name} - ${m.category || ''}</option>`;
+                });
+            } catch { }
+        }
+
+        async function loadQueue() {
+            const queueList = document.getElementById('queueList');
+            const roleLow = userRole.toLowerCase();
+            let filterDoctor = (roleLow === 'resident' || roleLow === 'admin') ? document.getElementById('cmbPrepConsultant').value : userFullName;
+
+            try {
+                const url = `/api/doctor/queue?dept=${encodeURIComponent(currentSelectedDepartment)}&doctorName=${encodeURIComponent(filterDoctor)}&userRole=${encodeURIComponent(userRole)}`;
+                const res = await fetch(url);
+                const list = await res.json();
+                queueDataStore = list;
+                queueList.innerHTML = '';
+
+                if (list.length === 0) {
+                    queueList.innerHTML = `<li class="list-group-item text-muted text-center py-4">${currentLanguage === 'ar' ? 'لا توجد حالات في انتظار ' + currentSelectedDepartment : 'No waiting cases'}</li>`;
+                    return;
+                }
+
+                list.forEach((item, index) => {
+                    const activeClass = (item.queueId === selectedQueueId) ? 'active' : '';
+                    let statusBadge = '<span class="badge bg-warning text-dark">انتظار</span>';
+                    if (item.status === 'Dilating') statusBadge = '<span class="badge bg-warning text-dark">قيد التوسيع ⏳</span>';
+                    else if (item.status === 'DilationReady') statusBadge = '<span class="badge bg-success">اكتمل التوسيع ✅</span>';
+                    else if (item.status === 'Operating') statusBadge = '<span class="badge bg-danger">جارية بالعمليات ⚡</span>';
+
+                    queueList.innerHTML += `
+                        <li id="queue_item_${item.queueId}" class="list-group-item queue-item ${activeClass} d-flex justify-content-between align-items-center py-2" onclick="selectPatientByIndex(${index})">
+                            <div>
+                                <span class="badge bg-primary me-1">${item.queueNumber}</span>
+                                <strong>${item.fullName}</strong>
+                                <small class="d-block text-muted">${item.department} - ${item.serviceType || ''} ${item.doctorName ? ' (' + item.doctorName + ')' : ''}</small>
+                            </div>
+                            ${statusBadge}
+                        </li>`;
+                });
+            } catch {
+                queueList.innerHTML = '<li class="list-group-item text-danger text-center">تعذر تحميل القائمة</li>';
+            }
+        }
+
+        function selectPatientByIndex(index) {
+            const item = queueDataStore[index];
+            if (!item) return;
+            selectPatient(item.patientId, item.fullName, item.queueNumber, item.queueId, item.department, item.status, item.dilationType, item.dilationEye, item.needPostRefraction, item.doctorName, item.serviceType, item.eyeSide);
+        }
+
+        async function loadFinishedQueue() {
+            const queueList = document.getElementById('queueList');
+            const roleLow = userRole.toLowerCase();
+            let filterDoctor = (roleLow === 'resident' || roleLow === 'admin') ? document.getElementById('cmbPrepConsultant').value : userFullName;
+
+            try {
+                const url = `/api/doctor/finished-queue?dept=${encodeURIComponent(currentSelectedDepartment)}&doctorName=${encodeURIComponent(filterDoctor)}&userRole=${encodeURIComponent(userRole)}`;
+                const res = await fetch(url);
+                const list = await res.json();
+                queueList.innerHTML = '';
+
+                if (list.length === 0) {
+                    queueList.innerHTML = `<li class="list-group-item text-muted text-center py-4">${currentLanguage === 'ar' ? 'لا توجد حالات مكتملة لليوم' : 'No finished cases today'}</li>`;
+                    return;
+                }
+
+                list.forEach(item => {
+                    queueList.innerHTML += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                            <div>
+                                <strong class="d-block">${item.fullName}</strong>
+                                <small class="text-muted">كود: ${item.patientId}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success fw-bold py-1 px-2" onclick="recallPatient(${item.queueId}, ${item.patientId})">↩️ Recall</button>
+                        </li>`;
+                });
+            } catch {
+                queueList.innerHTML = '<li class="list-group-item text-danger text-center">تعذر تحميل الحالات المكتملة</li>';
+            }
+        }
+
+        async function recallPatient(queueId, patientId) {
+            const res = await fetch('/api/doctor/recall', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ queueId: queueId })
+            });
+
+            if (res.ok) {
+                alert('✅ تم استدعاء المريض وإعادة فتح ملفه بنجاح!');
+                setQueueTab('waiting');
+                await loadPatientDataAndPreviousHistory(patientId, queueId);
+            }
+        }
+
+        async function dismissCurrentPatient() {
+            if (selectedQueueId === 0) { alert('اختر مريضاً أولاً!'); return; }
+            if (!confirm('هل تريد إنهاء وإخفاء هذه الحالة من قائمة الانتظار؟')) return;
+
+            const res = await fetch('/api/doctor/dismiss', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ queueId: selectedQueueId })
+            });
+
+            if (res.ok) {
+                resetViews();
+                loadCurrentQueueView();
+            }
+        }
+
+        async function doctorQuickSearch() {
+            const q = document.getElementById('txtDoctorQuickSearch').value.trim();
+            if (!q) return;
+
+            const res = await fetch('/api/reception/search?q=' + encodeURIComponent(q));
+            const list = await res.json();
+            if (list.length > 0) {
+                await loadPatientDataAndPreviousHistory(list[0].patientId, 0);
+            } else {
+                alert('لم يتم العثور على أي ملف بهذا الرقم أو الاسم.');
+            }
+        }
+
+        async function loadPatientDataAndPreviousHistory(patientId, queueId) {
+            selectedPatientId = patientId;
+            selectedQueueId = queueId;
+
+            const container = document.getElementById('examContainer');
+            container.style.opacity = '1';
+            container.style.pointerEvents = 'auto';
+
+            clearForm();
+
+            const res = await fetch('/api/reception/patient/' + patientId);
+            if (res.ok) {
+                const data = await res.json();
+                const p = data.patient;
+                selectedPatientName = p.fullName;
+                document.getElementById('docPatientName').innerText = p.fullName;
+                document.getElementById('docFileCode').innerText = `الكود: ${p.patientId}`;
+                document.getElementById('docQueueBadge').innerText = queueId > 0 ? `الدور: ${queueId}` : 'سجل سابق';
+                document.getElementById('docDeptBadge').innerText = currentSelectedDepartment;
+
+                selectedPatientDetails = `السن: ${p.age || '--'} سنة | الهاتف: ${p.mobile || '--'} | الرقم القومي: ${p.nationalId || '--'}`;
+                document.getElementById('docPatientDetails').innerText = selectedPatientDetails;
+
+                const todayDate = new Date().toLocaleDateString(currentLanguage === 'ar' ? 'ar-EG' : 'en-US');
+                document.getElementById('hdrPatientNameDisplay').innerText = p.fullName;
+                document.getElementById('hdrFileNoDisplay').innerText = p.patientId;
+                document.getElementById('hdrDateDisplay').innerText = todayDate;
+                
+                document.getElementById('laserPatientDisplay').innerText = p.fullName;
+                document.getElementById('laserFileDisplay').innerText = p.patientId;
+                document.getElementById('laserDateDisplay').innerText = todayDate;
+
+                document.getElementById('surgPatientDisplay').innerText = p.fullName;
+                document.getElementById('surgFileDisplay').innerText = p.patientId;
+                document.getElementById('surgDateDisplay').innerText = todayDate;
+
+                if (data.history && data.history.length > 0) {
+                    const lastVisit = data.history[0];
+                    if (lastVisit.notes) {
+                        document.getElementById('txtFindings').value = lastVisit.notes;
+                    }
+                }
+            }
+        }
+
+        async function selectPatient(patientId, fullName, queueNumber, queueId, dept, status, dType, dEye, needPostRefract, docName, bookedService, bookedEyeSide) {
+            selectedPatientId = patientId;
+            selectedQueueId = queueId;
+            selectedPatientName = fullName;
+            selectedDoctorName = docName || userFullName || 'طبيب المركز';
+
+            document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('active'));
+            const activeElem = document.getElementById(`queue_item_${queueId}`);
+            if (activeElem) activeElem.classList.add('active');
+
+            const container = document.getElementById('examContainer');
+            container.style.opacity = '1';
+            container.style.pointerEvents = 'auto';
+
+            document.getElementById('docPatientName').innerText = fullName;
+            document.getElementById('docQueueBadge').innerText = `الدور: ${queueNumber}`;
+            document.getElementById('docFileCode').innerText = `الكود: ${patientId}`;
+            document.getElementById('docDeptBadge').innerText = `القسم: ${dept}`;
+
+            const todayDate = new Date().toLocaleDateString(currentLanguage === 'ar' ? 'ar-EG' : 'en-US');
+            document.getElementById('hdrPatientNameDisplay').innerText = fullName;
+            document.getElementById('hdrFileNoDisplay').innerText = patientId;
+            document.getElementById('hdrDateDisplay').innerText = todayDate;
+            document.getElementById('hdrReferringDoctorDisplay').innerText = selectedDoctorName;
+            document.getElementById('scanReferringDocInput').value = selectedDoctorName;
+
+            document.getElementById('laserPatientDisplay').innerText = fullName;
+            document.getElementById('laserFileDisplay').innerText = patientId;
+            document.getElementById('laserDateDisplay').innerText = todayDate;
+            document.getElementById('laserDoctorDisplay').innerText = selectedDoctorName;
+            document.getElementById('laserReferringDocInput').value = selectedDoctorName;
+
+            document.getElementById('surgPatientDisplay').innerText = fullName;
+            document.getElementById('surgFileDisplay').innerText = patientId;
+            document.getElementById('surgDateDisplay').innerText = todayDate;
+            document.getElementById('surgDoctorDisplay').innerText = selectedDoctorName;
+            document.getElementById('surgDoctorDisplayInput').value = selectedDoctorName;
+
+            document.getElementById('surgProcedureInput').value = bookedService || 'إزالة مياه بيضاء وزرع عدسة بالفاكو';
+            document.getElementById('surgTargetEyeText').value = bookedEyeSide || 'العين اليمنى (OD)';
+
+            stopSurgeryTimer();
+            clearForm();
+
+            try {
+                const res = await fetch('/api/reception/patient/' + patientId);
+                if (res.ok) {
+                    const data = await res.json();
+                    const p = data.patient;
+                    selectedPatientDetails = `السن: ${p.age || '--'} سنة | الهاتف: ${p.mobile || '--'} | الرقم القومي: ${p.nationalId || '--'}`;
+                    document.getElementById('docPatientDetails').innerText = selectedPatientDetails;
+                }
+            } catch { }
+        }
+
+        function startSurgerySession() {
+            if (selectedPatientId === 0) { alert('اختر مريضاً أولاً!'); return; }
+
+            surgeryStartTime = new Date();
+            totalSurgeryElapsedSeconds = 0;
+
+            const btn = document.getElementById('btnStartSurgeryTimer');
+            btn.className = 'btn btn-danger fw-bold px-3 py-1 shadow-sm';
+            btn.innerText = '⏹️ العملية جارية الآن...';
+
+            if (surgeryTimerInterval) clearInterval(surgeryTimerInterval);
+
+            surgeryTimerInterval = setInterval(() => {
+                totalSurgeryElapsedSeconds++;
+                const hrs = String(Math.floor(totalSurgeryElapsedSeconds / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((totalSurgeryElapsedSeconds % 3600) / 60)).padStart(2, '0');
+                const secs = String(totalSurgeryElapsedSeconds % 60).padStart(2, '0');
+                document.getElementById('surgeryTimerBadge').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+
+            alert(`▶️ تم بدء العملية الجراحية الساعة: ${surgeryStartTime.toLocaleTimeString('ar-EG')}`);
+        }
+
+        function stopSurgeryTimer() {
+            if (surgeryTimerInterval) clearInterval(surgeryTimerInterval);
+            surgeryTimerInterval = null;
+            surgeryStartTime = null;
+            surgeryEndTime = null;
+            totalSurgeryElapsedSeconds = 0;
+
+            const btn = document.getElementById('btnStartSurgeryTimer');
+            if (btn) {
+                btn.className = 'btn btn-success fw-bold px-3 py-1 shadow-sm';
+                btn.innerText = '▶️ بدء العملية الجراحية';
+            }
+            const badge = document.getElementById('surgeryTimerBadge');
+            if (badge) badge.innerText = '00:00:00';
+        }
+
+        function addSurgeryMedication() {
+            const name = document.getElementById('surgMedName').value.trim();
+            const dose = document.getElementById('surgMedDose').value.trim();
+            if (!name) { alert('يرجى كتابة اسم العلاج أو القطرة'); return; }
+
+            surgeryMedications.push({ name, dose });
+            document.getElementById('surgMedName').value = '';
+            document.getElementById('surgMedDose').value = '';
+            renderSurgeryMedsTable();
+        }
+
+        function removeSurgeryMedication(index) {
+            surgeryMedications.splice(index, 1);
+            renderSurgeryMedsTable();
+        }
+
+        function renderSurgeryMedsTable() {
+            const tbody = document.getElementById('surgMedsTableBody');
+            tbody.innerHTML = '';
+            if (surgeryMedications.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted small">لم يتم إضافة أدوية لعلاج ما بعد الجراحة حتى الآن</td></tr>';
+                return;
+            }
+            surgeryMedications.forEach((m, i) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td class="fw-bold text-success text-start ps-3">${m.name}</td>
+                        <td>${m.dose || 'حسب الإرشادات'}</td>
+                        <td><button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="removeSurgeryMedication(${i})">✕</button></td>
+                    </tr>`;
+            });
+        }
+
+        async function finishSurgeryOperation() {
+            if (selectedPatientId === 0) { alert('يرجى اختيار مريض أولاً!'); return; }
+
+            surgeryEndTime = new Date();
+            if (surgeryTimerInterval) clearInterval(surgeryTimerInterval);
+
+            const durationMinutes = Math.max(1, Math.round(totalSurgeryElapsedSeconds / 60));
+            const proc = document.getElementById('surgProcedureInput').value;
+            const eye = document.getElementById('surgTargetEyeText').value;
+            const anesth = document.getElementById('surgAnesthesia').value;
+            const surgeon = document.getElementById('surgDoctorDisplayInput').value;
+            const assistant = document.getElementById('surgAssistantInput').value;
+            const anesthetist = document.getElementById('surgAnesthetistInput').value;
+            const nurse = document.getElementById('surgNurseInput').value;
+            const iolModel = document.getElementById('surgIolModel').value;
+            const iolPower = document.getElementById('surgIolPower').value;
+            const notes = document.getElementById('surgOperativeNotes').value;
+
+            const payload = {
+                patientId: selectedPatientId,
+                queueId: selectedQueueId,
+                complaint: `جراحة: ${proc} (${eye})`,
+                diagnosis: `تمت الجراحة بنجاح بنظام بيجول`,
+                findings: `الجراح: ${surgeon} | مساعد: ${assistant} | تخدير: ${anesthetist} (${anesth}) | تمريض: ${nurse} | عدسة: ${iolModel} (${iolPower}) | استغرقت: ${durationMinutes} دقيقة | خطوات العملية: ${notes}`,
+                prescription: JSON.stringify(surgeryMedications),
+                glassesOd: '',
+                glassesOs: '',
+                investigation: '',
+                surgery: proc,
+                referral: ''
+            };
+
+            const res = await fetch('/api/doctor/finish-visit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert(`🏁 تم إنهاء العملية الجراحية وغلق الملف بنجاح!\nمدة الجراحة المستغرقة: ${durationMinutes} دقيقة.`);
+                printSurgeryReport();
+                stopSurgeryTimer();
+                resetViews();
+                loadCurrentQueueView();
+            }
+        }
+
+        function printSurgeryReport() {
+            if (selectedPatientId === 0) { alert('اختر مريضاً أولاً!'); return; }
+
+            const proc = document.getElementById('surgProcedureInput').value || 'عملية جراحية بالعين';
+            const eye = document.getElementById('surgTargetEyeText').value || 'العين المقررة';
+            const anesth = document.getElementById('surgAnesthesia').value;
+            const surgeon = document.getElementById('surgDoctorDisplayInput').value || selectedDoctorName;
+            const assistant = document.getElementById('surgAssistantInput').value || '--';
+            const anesthetist = document.getElementById('surgAnesthetistInput').value || '--';
+            const nurse = document.getElementById('surgNurseInput').value || '--';
+            const iolModel = document.getElementById('surgIolModel').value || '--';
+            const iolPower = document.getElementById('surgIolPower').value || '--';
+            const iolSerial = document.getElementById('surgIolSerial').value || '--';
+            const notes = document.getElementById('surgOperativeNotes').value || 'تمت الجراحة بنجاح دون مضاعفات.';
+            const duration = Math.max(1, Math.round(totalSurgeryElapsedSeconds / 60));
+
+            let medsListHtml = surgeryMedications.map((m, i) => `
+                <div style="font-size: 0.95rem; margin-bottom: 6px;">
+                    ${i + 1}. <strong>${m.name}</strong>: ${m.dose}
+                </div>
+            `).join('') || '<div style="color: #666;">قطرات مضاد حيوي وكورتيزون حسب إرشادات الطبيب</div>';
+
+            const w = window.open('', '', 'width=880,height=960');
+            w.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>تقرير عملية جراحية معتمد - ${selectedPatientName}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 30px; color: #111; line-height: 1.6; }
+                        .report-header { border-bottom: 3px double #059669; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
+                        .patient-meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 12px 18px; border-radius: 8px; margin-bottom: 15px; font-size: 0.95rem; }
+                        .proc-title-box { background: #d1fae5; border-right: 5px solid #059669; padding: 10px 15px; font-size: 1.25rem; font-weight: bold; color: #065f46; margin-bottom: 15px; }
+                        .team-table, .iol-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; text-align: center; }
+                        .team-table th, .team-table td, .iol-table th, .iol-table td { border: 1px solid #a7f3d0; padding: 7px; font-size: 0.9rem; }
+                        .notes-box { min-height: 180px; font-size: 1.05rem; white-space: pre-wrap; padding: 12px; border: 1px dashed #059669; border-radius: 8px; background: #ffffff; margin-bottom: 15px; }
+                        .postop-box { background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 12px; margin-bottom: 15px; }
+                        .signatures { margin-top: 35px; display: flex; justify-content: space-between; padding: 0 20px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-header">
+                        <div>
+                            <h2 style="margin: 0; color: #059669;">👁️ مركز حبشي التخصصي للعيون</h2>
+                            <small>نظام بيجول (Begol Eye System) • وحدة العمليات وجراحة العيون المتقدمة</small>
+                        </div>
+                        <div style="text-align: left;">
+                            <div style="font-size: 1.15rem; font-weight: bold; color: #065f46;">OPERATIVE SURGICAL REPORT</div>
+                            <div style="font-size: 0.85rem; color: #555;">تقرير عملية جراحية معتمد</div>
+                            <small>${new Date().toLocaleDateString('ar-EG')}</small>
+                        </div>
+                    </div>
+
+                    <div class="patient-meta-grid">
+                        <div><strong>اسم المريض:</strong> ${selectedPatientName}</div>
+                        <div><strong>رقم الملف:</strong> ${selectedPatientId}</div>
+                        <div><strong>تاريخ الجراحة:</strong> ${new Date().toLocaleDateString('ar-EG')}</div>
+                        <div><strong>مدة العملية المستغرقة:</strong> ${duration} دقيقة</div>
+                    </div>
+
+                    <div class="proc-title-box">
+                        🏥 العملية المجراة: ${proc} &nbsp;&nbsp;|&nbsp;&nbsp; العين المقررة: ${eye}
+                    </div>
+
+                    <h5 style="margin-bottom: 5px; color: #047857;">الفريق الجراحي وطاقم العمليات:</h5>
+                    <table class="team-table">
+                        <tr style="background: #e6fffa; font-weight: bold;">
+                            <td>الجراح الرئيسي</td>
+                            <td>مساعد الجراح</td>
+                            <td>طبيب التخدير</td>
+                            <td>نوع التخدير</td>
+                            <td>تمريض العمليات</td>
+                        </tr>
+                        <tr>
+                            <td>د. ${surgeon}</td>
+                            <td>${assistant}</td>
+                            <td>${anesthetist}</td>
+                            <td>${anesth}</td>
+                            <td>${nurse}</td>
+                        </tr>
+                    </table>
+
+                    <h5 style="margin-bottom: 5px; color: #047857;">بيانات العدسة المزروعة (IOL Data):</h5>
+                    <table class="iol-table">
+                        <tr style="background: #e6fffa; font-weight: bold;">
+                            <td>موديل ونوع العدسة (Make/Model)</td>
+                            <td>قوة العدسة (Power)</td>
+                            <td>الرقم التسلسلي (Serial / Lot No)</td>
+                        </tr>
+                        <tr><td>${iolModel}</td><td>${iolPower}</td><td>${iolSerial}</td></tr>
+                    </table>
+
+                    <h5 style="margin-bottom: 5px; color: #047857;">خطوات العملية والتقرير الجراحي (Operative Notes):</h5>
+                    <div class="notes-box">${notes}</div>
+
+                    <div class="postop-box">
+                        <h6 style="font-weight: bold; color: #166534; margin-bottom: 6px;">💊 علاج وروشتة ما بعد العملية وتوصيات الخروج:</h6>
+                        ${medsListHtml}
+                        <small style="color: #15803d; display: block; margin-top: 6px;">⚠️ يرجى الالتزام بالغطاء الواقي للعين وتجنب فرك العين، والمتابعة بالعيادة بعد 24 ساعة.</small>
+                    </div>
+
+                    <div class="signatures">
+                        <div>توقيع الجراح: د. ${surgeon}</div>
+                        <div>اعتماد إدارة مركز حبشي: _________________</div>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: center; font-size: 0.72rem; color: #666; border-top: 1px solid #a7f3d0; padding-top: 6px;">
+                        نظام بيجول لإدارة مراكز العيون (Begol) • تم التطوير بواسطة: آندي (Andy)
+                    </div>
+
+                    <script>
+                        window.onload = function() { window.print(); setTimeout(() => { window.close(); }, 600); };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            w.document.close();
+        }
+
+        async function sendDilationOrder() {
+            if (selectedQueueId === 0) { alert('اختر مريضاً أولاً!'); return; }
+            const payload = {
+                queueId: selectedQueueId,
+                dilationType: document.getElementById('cmbDilationType').value,
+                targetEye: document.getElementById('cmbDilationEye').value,
+                needPostRefraction: document.getElementById('cmbPostRefraction').value === 'true'
+            };
+            const res = await fetch('/api/doctor/request-dilation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert('✅ تم إرسال أمر التوسيع للتمريض بنجاح!');
+                loadCurrentQueueView();
+            }
+        }
+
+        function resetViews() {
+            document.getElementById('docPatientName').innerText = currentLanguage === 'ar' ? 'اختر مريضاً من قائمة الانتظار للبدء' : 'Select patient from queue';
+            document.getElementById('docPatientDetails').innerText = 'الرقم القومي: -- | الهاتف: -- | السن: --';
+            document.getElementById('docQueueBadge').innerText = 'الدور: --';
+            document.getElementById('docFileCode').innerText = 'الكود: --';
+            document.getElementById('docDeptBadge').innerText = 'القسم: --';
+            document.getElementById('examContainer').style.opacity = '0.5';
+            document.getElementById('examContainer').style.pointerEvents = 'none';
+        }
+
+        function clearForm() {
+            document.getElementById('txtComplaint').value = '';
+            document.getElementById('txtFindings').value = '';
+            document.getElementById('txtDiagnosis').value = '';
+            document.getElementById('scanFindingsReport').value = '';
+            document.getElementById('laserOperativeNotes').value = '';
+            document.getElementById('laserEnergy').value = '';
+            document.getElementById('laserShots').value = '';
+            document.getElementById('laserSpotSize').value = '';
+            document.getElementById('laserPostIOP').value = '';
+            document.getElementById('surgIolModel').value = '';
+            document.getElementById('surgIolPower').value = '';
+            document.getElementById('surgIolSerial').value = '';
+            document.getElementById('surgOperativeNotes').value = '';
+
+            ['od_sph','od_cyl','od_axis','od_add','od_va','od_iop','os_sph','os_cyl','os_axis','os_add','os_va','os_iop','ipd'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            medications = [];
+            surgeryMedications = [];
+            renderMedsTable();
+            renderSurgeryMedsTable();
+        }
+
+        function addMedication() {
+            const name = document.getElementById('medName').value.trim();
+            const eye = document.getElementById('medEye').value;
+            const dose = document.getElementById('medDoseSelect').value;
+            const dur = document.getElementById('medDuration').value.trim() || 'أسبوع';
+            const inst = document.getElementById('medInstructions').value.trim();
+            if (!name) { alert('يرجى تحديد أو كتابة اسم الدواء'); return; }
+
+            medications.push({ name, eye, dose, dur, inst });
+            document.getElementById('medName').value = '';
+            document.getElementById('medDuration').value = '';
+            document.getElementById('medInstructions').value = '';
+            renderMedsTable();
+        }
+
+        function removeMedication(idx) {
+            medications.splice(idx, 1);
+            renderMedsTable();
+        }
+
+        function renderMedsTable() {
+            const tbody = document.getElementById('medsTableBody');
+            tbody.innerHTML = '';
+            if (medications.length === 0) {
+                tbody.innerHTML = `<tr id="emptyMedsRow"><td colspan="7" class="text-muted small">${currentLanguage === 'ar' ? 'لم يتم إضافة أدوية حتى الآن' : 'No medications added yet'}</td></tr>`;
+                return;
+            }
+            medications.forEach((m, i) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td class="text-start fw-bold text-primary">${m.name}</td>
+                        <td><span class="badge bg-secondary">${m.eye}</span></td>
+                        <td>${m.dose}</td>
+                        <td>${m.dur}</td>
+                        <td class="small text-danger">${m.inst || '-'}</td>
+                        <td><button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="removeMedication(${i})">✕</button></td>
+                    </tr>`;
+            });
+        }
+
+        async function finishExamination() {
+            if (selectedPatientId === 0) { alert('يرجى اختيار مريض أولاً!'); return; }
+
+            let complaint = '';
+            let diagnosis = '';
+            let findings = '';
+
+            if (currentSelectedDepartment === 'عيادة الكشف') {
+                complaint = document.getElementById('txtComplaint').value;
+                diagnosis = document.getElementById('txtDiagnosis').value;
+                findings = document.getElementById('txtFindings').value;
+            } else if (currentSelectedDepartment === 'وحدة الفحوصات') {
+                const scanType = document.getElementById('scanTypeName').value;
+                const eye = document.getElementById('scanTargetEye').value;
+                const refDoc = document.getElementById('scanReferringDocInput').value;
+                const report = document.getElementById('scanFindingsReport').value;
+                diagnosis = `تقرير فحص: ${scanType} (${eye}) - بطلب من د. ${refDoc}`;
+                findings = report;
+
+                const fileInput = document.getElementById('scanAttachmentFile');
+                if (fileInput.files && fileInput.files.length > 0) {
+                    const fd = new FormData();
+                    fd.append('file', fileInput.files[0]);
+                    fd.append('patientId', selectedPatientId);
+                    fd.append('title', `تقرير ${scanType}`);
+                    fd.append('userName', userFullName);
+                    await fetch('/api/reception/upload-attachment', { method: 'POST', body: fd });
+                }
+            } else if (currentSelectedDepartment === 'وحدة الليزر') {
+                const procType = document.getElementById('laserProcedureType').value;
+                const eye = document.getElementById('laserTargetEye').value;
+                const refDoc = document.getElementById('laserReferringDocInput').value;
+                const notes = document.getElementById('laserOperativeNotes').value;
+                const energy = document.getElementById('laserEnergy').value;
+                const shots = document.getElementById('laserShots').value;
+                const iop = document.getElementById('laserPostIOP').value;
+                diagnosis = `جلسة ليزر: ${procType} (${eye}) - بطلب من د. ${refDoc}`;
+                findings = `معايير الليزر: طاقة: ${energy} | طلقات: ${shots} | ضغط عين: ${iop} | ${notes}`;
+            }
+
+            const payload = {
+                patientId: selectedPatientId,
+                queueId: selectedQueueId,
+                complaint: complaint,
+                diagnosis: diagnosis,
+                findings: findings,
+                prescription: JSON.stringify(medications),
+                glassesOd: `OD: SPH:${document.getElementById('od_sph').value} CYL:${document.getElementById('od_cyl').value} AXIS:${document.getElementById('od_axis').value} ADD:${document.getElementById('od_add').value} VA:${document.getElementById('od_va').value} IOP:${document.getElementById('od_iop').value}`,
+                glassesOs: `OS: SPH:${document.getElementById('os_sph').value} CYL:${document.getElementById('os_cyl').value} AXIS:${document.getElementById('os_axis').value} ADD:${document.getElementById('os_add').value} VA:${document.getElementById('os_va').value} IOP:${document.getElementById('os_iop').value}`,
+                investigation: '',
+                surgery: '',
+                referral: ''
+            };
+
+            const res = await fetch('/api/doctor/finish-visit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert(currentLanguage === 'ar' ? '✅ تم اعتماد وحفظ الإجراء بنجاح في نظام بيجول' : '✅ Visit completed successfully in Begol System');
+                resetViews();
+                loadCurrentQueueView();
+            }
+        }
+
+        function openReferralModal(type) {
+            if (selectedPatientId === 0) { alert('اختر مريضاً أولاً!'); return; }
+            activeReferralType = type;
+            document.getElementById('refPatientDisplay').innerText = selectedPatientName;
+            document.getElementById('refFileDisplay').innerText = selectedPatientId;
+            document.getElementById('refDetailsInput').value = '';
+            document.getElementById('refDiagnosisInput').value = document.getElementById('txtDiagnosis').value.trim();
+
+            const eyeRow = document.getElementById('refEyeRow');
+            const targetLabel = document.getElementById('refTargetLabel');
+            const targetInput = document.getElementById('refTargetInput');
+            const generalTargetField = document.getElementById('generalTargetField');
+            const doctorReferralFields = document.getElementById('doctorReferralFields');
+            const modalTitle = document.getElementById('refModalTitle');
+
+            if (type === 'doctor') {
+                modalTitle.innerText = '👨‍⚕️ خطاب تحويل واستشارة طبية لطبيب آخر';
+                doctorReferralFields.style.display = 'block';
+                generalTargetField.style.display = 'none';
+                eyeRow.style.display = 'none';
+                document.getElementById('refDoctorNameInput').value = '';
+                document.getElementById('refDoctorSpecialtyInput').value = 'Endocrinology & Diabetes | استشاري الباطنة والسكر والغدد الصماء';
+                if (!document.getElementById('refDiagnosisInput').value) document.getElementById('refDiagnosisInput').value = 'Diabetic Retinopathy | اعتلال الشبكية السكري';
+                document.getElementById('refDetailsInput').value = 'نرجو من سيادتكم التكرم بمناظرة حالة المريض وضبط مستويات السكر بالدم، حيث يعاني المريض من مضاعفات بالشبكية، مع وافر الشكر والتقدير.';
+            } else {
+                doctorReferralFields.style.display = 'none';
+                generalTargetField.style.display = 'block';
+
+                if (type === 'scans') {
+                    modalTitle.innerText = '🔬 طلب تحويل فحوصات وأشعة تشخيصية';
+                    targetLabel.innerText = 'اسم الفحص المطلوب:*';
+                    targetInput.setAttribute('list', 'scansPredefinedList');
+                    targetInput.value = 'OCT Macula | أشعة مقطعية على مركز الإبصار والشبكية';
+                    eyeRow.style.display = 'flex';
+                } else if (type === 'labs') {
+                    modalTitle.innerText = '🧪 طلب تحاليل معملية للمريض';
+                    targetLabel.innerText = 'التحاليل المطلوبة:*';
+                    targetInput.setAttribute('list', 'labsPredefinedList');
+                    targetInput.value = 'HbA1c (Glycated Hemoglobin) | سكر تراكمي';
+                    eyeRow.style.display = 'none';
+                } else if (type === 'surgery') {
+                    modalTitle.innerText = '🏥 قرار وتجهيز عملية جراحية';
+                    targetLabel.innerText = 'اسم ونوع العملية المقررة:*';
+                    targetInput.setAttribute('list', 'surgeriesPredefinedList');
+                    targetInput.value = 'Phacoemulsification + Foldable IOL Implantation | إزالة مياه بيضاء وزرع عدسة رخوة بالفاكو';
+                    eyeRow.style.display = 'flex';
+                    if (!document.getElementById('refDiagnosisInput').value) document.getElementById('refDiagnosisInput').value = 'Senile Immature Cataract | مياه بيضاء شيخوخية';
+                    document.getElementById('refDetailsInput').value = 'المريض لائق للجراحة بعد عمل الفحوصات والتحاليل، تم شرح الإجراء ومخاطره للمريض والحصول على الموافقة المستنيرة.';
+                }
+            }
+            refModalInstance.show();
+        }
+
+        async function executePrintReferral() {
+            const eye = document.getElementById('refEyeSelect').value;
+            const anesthesia = document.getElementById('refAnesthesiaSelect').value;
+            const docName = sessionStorage.getItem('fullName') || 'استشاري العيون';
+            const diagnosis = document.getElementById('refDiagnosisInput').value.trim();
+            const details = document.getElementById('refDetailsInput').value.trim() || 'يرجى عمل اللازم والإفادة بالتقرير الطبي المعتمد.';
+
+            let titleEn = '';
+            let titleAr = '';
+            let doctorNameCustom = '';
+            let typeTitleEn = 'MEDICAL REFERRAL LETTER';
+            let typeTitleAr = 'خطاب تحويل واستشارة طبية';
+            let extraBlock = '';
+
+            if (activeReferralType === 'doctor') {
+                doctorNameCustom = document.getElementById('refDoctorNameInput').value.trim() || 'الطبيب المحال إليه';
+                const rawSpec = document.getElementById('refDoctorSpecialtyInput').value.trim();
+                if (rawSpec.includes('|')) {
+                    const p = rawSpec.split('|');
+                    titleEn = p[0].trim();
+                    titleAr = p[1].trim();
+                } else {
+                    titleEn = rawSpec;
+                }
+            } else {
+                const rawTarget = document.getElementById('refTargetInput').value.trim();
+                if (!rawTarget) { alert('يرجى تحديد المطلوب أولاً!'); return; }
+                if (rawTarget.includes('|')) {
+                    const parts = rawTarget.split('|');
+                    titleEn = parts[0].trim();
+                    titleAr = parts[1].trim();
+                } else {
+                    titleEn = rawTarget;
+                }
+
+                if (activeReferralType === 'scans') {
+                    typeTitleEn = 'INVESTIGATION REQUEST';
+                    typeTitleAr = 'طلب فحص وأشعة تشخيصية';
+                    extraBlock = `<div><strong>العين المفحوصة (Target Eye):</strong> ${eye}</div>`;
+                } else if (activeReferralType === 'labs') {
+                    typeTitleEn = 'LABORATORY REQUEST';
+                    typeTitleAr = 'طلب تحاليل معملية';
+                } else if (activeReferralType === 'surgery') {
+                    typeTitleEn = 'SURGICAL ORDER';
+                    typeTitleAr = 'قرار حجز عملية جراحية';
+                    extraBlock = `<div><strong>العين المقررة للجراحة:</strong> ${eye}</div><div><strong>نوع التخدير:</strong> ${anesthesia}</div>`;
+                }
+            }
+
+            let diagEn = diagnosis;
+            let diagAr = '';
+            if (diagnosis.includes('|')) {
+                const dParts = diagnosis.split('|');
+                diagEn = dParts[0].trim();
+                diagAr = dParts[1].trim();
+            }
+
+            let mainBoxContent = activeReferralType === 'doctor' ? `
+                <div style="font-size: 1.1rem; color: #0f172a; margin-bottom: 5px;">
+                    <strong>Referred To:</strong> Dr. ${doctorNameCustom} &nbsp;|&nbsp; <strong>إلى الزميل العزيز:</strong> د. ${doctorNameCustom}
+                </div>
+                <div style="font-size: 1.35rem; font-weight: 800; color: #0369a1;">${titleEn}</div>
+                ${titleAr ? `<div style="font-size: 1.05rem; font-weight: 600; color: #475569;">${titleAr}</div>` : ''}
+            ` : `
+                <div style="font-size: 1.35rem; font-weight: 800; color: #0369a1;">${titleEn}</div>
+                ${titleAr ? `<div style="font-size: 1.05rem; font-weight: 600; color: #475569;">${titleAr}</div>` : ''}
+                ${extraBlock ? `<div style="margin-top: 8px; border-top: 1px dashed #93c5fd; padding-top: 6px;">${extraBlock}</div>` : ''}
+            `;
+
+            const w = window.open('', '', 'width=850,height=920');
+            w.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>${typeTitleEn} - ${selectedPatientName}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; padding: 35px; color: #111; line-height: 1.6; }
+                        .report-header { border-bottom: 3px double #0284c7; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+                        .patient-meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; }
+                        .bilingual-target-box { background: #f0f9ff; border: 2px solid #bae6fd; border-right: 6px solid #0284c7; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; }
+                        .diagnosis-box { background: #fffbeb; border: 1px solid #fef08a; border-right: 5px solid #eab308; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; }
+                        .report-content { min-height: 320px; font-size: 1.1rem; white-space: pre-wrap; padding: 15px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #ffffff; }
+                        .signatures { margin-top: 45px; display: flex; justify-content: space-between; padding: 0 20px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-header">
+                        <div>
+                            <h2 style="margin: 0; color: #0284c7;">👁️ مركز حبشي التخصصي للعيون</h2>
+                            <small>نظام بيجول (Begol Eye System) • عيادات وجراحات العيون التخصصية</small>
+                        </div>
+                        <div style="text-align: left;">
+                            <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a;">${typeTitleEn}</div>
+                            <div style="font-size: 0.9rem; color: #64748b;">${typeTitleAr}</div>
+                            <small>${new Date().toLocaleDateString('ar-EG')}</small>
+                        </div>
+                    </div>
+                    <div class="patient-meta-grid">
+                        <div><strong>Patient Name / اسم المريض:</strong> ${selectedPatientName}</div>
+                        <div><strong>File No / رقم الملف:</strong> ${selectedPatientId}</div>
+                        <div><strong>Referring Doctor / الطبيب المعالج:</strong> د. ${docName}</div>
+                        <div><strong>Date / التاريخ:</strong> ${new Date().toLocaleDateString('ar-EG')}</div>
+                    </div>
+                    <div class="bilingual-target-box">${mainBoxContent}</div>
+                    ${diagnosis ? `<div class="diagnosis-box"><div style="font-size: 0.85rem; font-weight: bold; color: #854d0e;">CLINICAL DIAGNOSIS:</div><div style="font-size: 1.15rem; font-weight: bold; color: #713f12;">${diagEn}</div></div>` : ''}
+                    <h5 style="margin-bottom: 6px; color: #1e3a8a;">Clinical Notes & Indication / ملاحظات الإحالة:</h5>
+                    <div class="report-content">${details}</div>
+                    <div class="signatures">
+                        <div>توقيع وختم الطبيب: د. ${docName}</div>
+                        <div>خاتم مركز حبشي: _________________</div>
+                    </div>
+                    <div style="margin-top: 25px; text-align: center; font-size: 0.75rem; color: #666; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                        نظام بيجول لإدارة مراكز العيون (Begol) • تم التطوير بواسطة: آندي (Andy)
+                    </div>
+                    <script>window.onload = function() { window.print(); setTimeout(() => { window.close(); }, 600); };<\/script>
+                </body>
+                </html>
+            `);
+            w.document.close();
+            refModalInstance.hide();
+        }
+
+        async function showPatientOrdersHistory() {
+            if (selectedPatientId === 0) { alert('اختر مريضاً أولاً!'); return; }
+            const res = await fetch('/api/doctor/patient-orders/' + selectedPatientId);
+            const orders = await res.json();
+            if (orders.length === 0) { alert('لا توجد أوامر أو تحويلات سابقة مسجلة لهذا المريض.'); return; }
+            let msg = `سجل الأوامر والتحويلات الطبية للمريض (${selectedPatientName}):\n\n`;
+            orders.forEach((o, i) => {
+                msg += `${i+1}. [${o.orderType.toUpperCase()}] - ${o.titleEn}\n   التاريخ: ${o.date} | الطبيب: ${o.doctor}\n   التفاصيل: ${o.details}\n------------------------------------------\n`;
+            });
+            alert(msg);
+        }
+
+        function printLaserReport() {
+            if (selectedPatientId === 0) { alert('اختر مريضاً أولاً!'); return; }
+            const proc = document.getElementById('laserProcedureType').value;
+            const eye = document.getElementById('laserTargetEye').value;
+            const refDoc = document.getElementById('laserReferringDocInput').value || selectedDoctorName;
+            const notes = document.getElementById('laserOperativeNotes').value || 'لا توجد ملاحظات إضافية.';
+            const energy = document.getElementById('laserEnergy').value || '--';
+            const shots = document.getElementById('laserShots').value || '--';
+            const spotSize = document.getElementById('laserSpotSize').value || '--';
+            const iop = document.getElementById('laserPostIOP').value || '--';
+
+            const w = window.open('', '', 'width=850,height=900');
+            w.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>تقرير جلسة ليزر - ${selectedPatientName}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 30px; color: #111; line-height: 1.6; }
+                        .report-header { border-bottom: 3px double #ea580c; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+                        .patient-meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: #fff7ed; border: 1px solid #fed7aa; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; }
+                        .proc-title-box { background: #fee2e2; border-right: 5px solid #dc2626; padding: 10px 15px; font-size: 1.25rem; font-weight: bold; color: #991b1b; margin-bottom: 20px; }
+                        .params-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; text-align: center; }
+                        .params-table th, .params-table td { border: 1px solid #fed7aa; padding: 8px; }
+                        .notes-box { min-height: 250px; font-size: 1.1rem; white-space: pre-wrap; padding: 12px; border: 1px dashed #ea580c; border-radius: 8px; background: #ffffff; }
+                        .signatures { margin-top: 50px; display: flex; justify-content: space-between; padding: 0 20px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-header">
+                        <div>
+                            <h2 style="margin: 0; color: #ea580c;">👁️ مركز حبشي التخصصي للعيون</h2>
+                            <small>نظام بيجول (Begol Eye System) • وحدة الليزر والشبكية</small>
+                        </div>
+                        <div style="text-align: left;">
+                            <div style="font-size: 1.1rem; font-weight: bold;">تقرير جلسة ليزر عيون معتمد</div>
+                            <small>${new Date().toLocaleDateString('ar-EG')}</small>
+                        </div>
+                    </div>
+                    <div class="patient-meta-grid">
+                        <div><strong>اسم المريض:</strong> ${selectedPatientName}</div>
+                        <div><strong>رقم الملف:</strong> ${selectedPatientId}</div>
+                        <div><strong>الطبيب المعالج:</strong> د. ${refDoc}</div>
+                        <div><strong>تاريخ الجلسة:</strong> ${new Date().toLocaleDateString('ar-EG')}</div>
+                    </div>
+                    <div class="proc-title-box">⚡ نوع الجلسة: ${proc} &nbsp;|&nbsp; العين المعالجة: ${eye}</div>
+                    <table class="params-table">
+                        <tr style="background: #ffedd5; font-weight: bold;">
+                            <td>مستوى الطاقة (Energy)</td><td>عدد الطلقات (Shots)</td><td>حجم البقعة (Spot Size)</td><td>ضغط العين (Post IOP)</td>
+                        </tr>
+                        <tr><td>${energy}</td><td>${shots}</td><td>${spotSize}</td><td>${iop}</td></tr>
+                    </table>
+                    <h4 style="margin-bottom: 8px; color: #9a3412;">تقرير الإجراء وتوصيات ما بعد الليزر:</h4>
+                    <div class="notes-box">${notes}</div>
+                    <div class="signatures">
+                        <div>طبيب الليزر: د. ${userFullName}</div>
+                        <div>اعتماد مركز حبشي: _________________</div>
+                    </div>
+                    <div style="margin-top: 25px; text-align: center; font-size: 0.75rem; color: #666; border-top: 1px solid #fed7aa; padding-top: 8px;">
+                        نظام بيجول لإدارة مراكز العيون (Begol) • تم التطوير بواسطة: آندي (Andy)
+                    </div>
+                    <script>window.onload = function() { window.print(); setTimeout(() => { window.close(); }, 600); };<\/script>
+                </body>
+                </html>
+            `);
+            w.document.close();
+        }
+
+        function printInvestigationReport() {
+            if (selectedPatientId === 0) { alert('اختر مريضاً أولاً!'); return; }
+            const scanType = document.getElementById('scanTypeName').value || 'فحص عيون تخصصي';
+            const eye = document.getElementById('scanTargetEye').value || 'العينين (OU)';
+            const refDoc = document.getElementById('scanReferringDocInput').value || selectedDoctorName;
+            const reportText = document.getElementById('scanFindingsReport').value || 'لا يوجد تقرير مكتوب.';
+
+            const w = window.open('', '', 'width=850,height=950');
+            w.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>تقرير فحص طبي - ${selectedPatientName}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 30px; color: #111; line-height: 1.6; }
+                        .report-header { border-bottom: 3px double #0284c7; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+                        .patient-meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px 18px; border-radius: 8px; margin-bottom: 25px; font-size: 0.95rem; }
+                        .exam-title-box { background: #e0f2fe; border-right: 5px solid #0284c7; padding: 10px 15px; font-size: 1.25rem; font-weight: bold; color: #0369a1; margin-bottom: 25px; }
+                        .report-content { min-height: 420px; font-size: 1.1rem; white-space: pre-wrap; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #ffffff; }
+                        .signatures { margin-top: 50px; display: flex; justify-content: space-between; padding: 0 20px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-header">
+                        <div>
+                            <h2 style="margin: 0; color: #0284c7;">👁️ مركز حبشي التخصصي للعيون</h2>
+                            <small>نظام بيجول (Begol Eye System) • وحدة الفحوصات والأشعة</small>
+                        </div>
+                        <div style="text-align: left;">
+                            <div style="font-size: 1.1rem; font-weight: bold;">تقرير فحص طبي معتمد</div>
+                            <small>${new Date().toLocaleDateString('ar-EG')}</small>
+                        </div>
+                    </div>
+                    <div class="patient-meta-grid">
+                        <div><strong>اسم المريض:</strong> ${selectedPatientName}</div>
+                        <div><strong>رقم الملف:</strong> ${selectedPatientId}</div>
+                        <div><strong>الطبيب الطالب للفحص:</strong> د. ${refDoc}</div>
+                        <div><strong>تاريخ الفحص:</strong> ${new Date().toLocaleDateString('ar-EG')}</div>
+                    </div>
+                    <div class="exam-title-box">🔬 نوع الفحص: ${scanType} &nbsp;|&nbsp; العين المفحوصة: ${eye}</div>
+                    <h4 style="margin-bottom: 8px; color: #1e3a8a;">تقرير نتائج الفحص (Findings & Impression):</h4>
+                    <div class="report-content">${reportText}</div>
+                    <div class="signatures">
+                        <div>فاحص الوحدة: د. ${userFullName}</div>
+                        <div>اعتماد مركز حبشي: _________________</div>
+                    </div>
+                    <div style="margin-top: 25px; text-align: center; font-size: 0.75rem; color: #666; border-top: 1px solid #cbd5e1; padding-top: 8px;">
+                        نظام بيجول لإدارة مراكز العيون (Begol) • تم التطوير بواسطة: آندي (Andy)
+                    </div>
+                    <script>window.onload = function() { window.print(); setTimeout(() => { window.close(); }, 600); };<\/script>
+                </body>
+                </html>
+            `);
+            w.document.close();
+        }
+
+        function printPrescription() {
+            if (selectedPatientId === 0) { alert('اختر مريضاً أولاً'); return; }
+            const docName = sessionStorage.getItem('fullName') || 'طبيب العيون';
+            let medsHtml = medications.map((m, i) => `
+                <div style="margin-bottom: 15px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;">
+                    <div style="font-size: 1.15rem; font-weight: bold; color: #1e3a8a;">${i + 1}. ${m.name}</div>
+                    <div style="font-size: 0.95rem; margin-right: 15px; color: #0f172a; margin-top: 3px;">
+                        • <strong>الموضع:</strong> ${m.eye} &nbsp;|&nbsp; <strong>الجرعة:</strong> ${m.dose} &nbsp;|&nbsp; <strong>المدة:</strong> ${m.dur}
+                    </div>
+                    ${m.inst ? `<div style="font-size: 0.88rem; margin-right: 15px; color: #dc2626; margin-top: 2px;">⚠️ تعليمات: ${m.inst}</div>` : ''}
+                </div>
+            `).join('') || '<div style="color: #777;">لم يتم تسجيل أدوية</div>';
+
+            const w = window.open('', '', 'width=750,height=850');
+            w.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>روشتة علاجية - ${selectedPatientName}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 25px; color: #111; }
+                        .header { border-bottom: 3px double #0284c7; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+                        .patient-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 6px; margin-bottom: 20px; font-size: 0.95rem; }
+                        .rx-title { font-size: 2.2rem; font-weight: bold; color: #0284c7; font-family: serif; margin-bottom: 10px; }
+                        .footer { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 15px; display: flex; justify-content: space-between; font-size: 0.85rem; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div>
+                            <h2 style="margin: 0; color: #0284c7;">👁️ مركز حبشي التخصصي للعيون</h2>
+                            <small>نظام بيجول (Begol Eye System) • عيادات طب وجراحة العيون</small>
+                        </div>
+                        <div style="text-align: left;">
+                            <div><strong>د. ${docName}</strong></div>
+                            <small>${new Date().toLocaleDateString('ar-EG')}</small>
+                        </div>
+                    </div>
+                    <div class="patient-box">
+                        <strong>اسم المريض:</strong> ${selectedPatientName} | <strong>كود الملف:</strong> ${selectedPatientId} | ${selectedPatientDetails}
+                    </div>
+                    <div class="rx-title">℞</div>
+                    <div style="min-height: 400px; padding: 0 10px;">${medsHtml}</div>
+                    <div class="footer">
+                        <div>العنوان: القاهرة - عين شمس</div>
+                        <div>توقيع الطبيب: _______________</div>
+                    </div>
+                    <div style="margin-top: 15px; text-align: center; font-size: 0.72rem; color: #777;">
+                        نظام بيجول لإدارة مراكز العيون (Begol) • تم التطوير بواسطة: آندي (Andy)
+                    </div>
+                    <script>window.onload = function() { window.print(); setTimeout(() => window.close(), 600); }<\/script>
+                </body>
+                </html>
+            `);
+            w.document.close();
+        }
+
+        function printGlassesRx() {
+            if (selectedPatientId === 0) { alert('اختر مريضاً أولاً'); return; }
+            const docName = sessionStorage.getItem('fullName') || 'طبيب العيون';
+            const lensCat = document.getElementById('cmbLensCategory').value;
+            const ipdVal = document.getElementById('ipd').value || '--';
+
+            const w = window.open('', '', 'width=750,height=620');
+            w.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>كارت مقاس النظارة - ${selectedPatientName}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 25px; }
+                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+                        .grid-box { display: flex; justify-content: space-between; margin: 20px 0; gap: 15px; }
+                        .eye-table { width: 45%; border-collapse: collapse; text-align: center; }
+                        .eye-table th, .eye-table td { border: 1px solid #000; padding: 6px; }
+                        .center-box { width: 10%; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px dashed #555; padding: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h2 style="margin: 0;">👁️ مركز حبشي التخصصي للعيون</h2>
+                        <div style="font-size: 0.85rem; color: #1e3a8a; font-weight: bold;">نظام بيجول (Begol Eye System)</div>
+                        <h4 style="margin: 5px 0;">كارت كشف ومقاس النظارة (Glasses Prescription)</h4>
+                    </div>
+                    <div><strong>المريض:</strong> ${selectedPatientName} | <strong>الكود:</strong> ${selectedPatientId} | <strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-EG')}</div>
+                    
+                    <div class="grid-box">
+                        <table class="eye-table">
+                            <tr style="background:#e0f2fe;"><th colspan="2">العين اليمنى (OD)</th></tr>
+                            <tr><td>SPH</td><td>${document.getElementById('od_sph').value || '0.00'}</td></tr>
+                            <tr><td>CYL</td><td>${document.getElementById('od_cyl').value || '0.00'}</td></tr>
+                            <tr><td>AXIS</td><td>${document.getElementById('od_axis').value || '180'}°</td></tr>
+                            <tr><td>ADD</td><td>${document.getElementById('od_add').value || '-'}</td></tr>
+                            <tr><td>VA</td><td>${document.getElementById('od_va').value || '6/6'}</td></tr>
+                        </table>
+
+                        <div class="center-box">
+                            <strong>IPD</strong>
+                            <div style="font-size: 1.2rem; font-weight: bold;">${ipdVal}</div>
+                            <small>mm</small>
+                        </div>
+
+                        <table class="eye-table">
+                            <tr style="background:#ffe4e6;"><th colspan="2">العين اليسرى (OS)</th></tr>
+                            <tr><td>SPH</td><td>${document.getElementById('os_sph').value || '0.00'}</td></tr>
+                            <tr><td>CYL</td><td>${document.getElementById('os_cyl').value || '0.00'}</td></tr>
+                            <tr><td>AXIS</td><td>${document.getElementById('os_axis').value || '180'}°</td></tr>
+                            <tr><td>ADD</td><td>${document.getElementById('os_add').value || '-'}</td></tr>
+                            <tr><td>VA</td><td>${document.getElementById('os_va').value || '6/6'}</td></tr>
+                        </table>
+                    </div>
+
+                    <div><strong>نوع العدسة المقترح:</strong> ${lensCat}</div>
+                    <div style="margin-top: 30px; text-align: left;"><strong>توقيع الطبيب:</strong> د. ${docName}</div>
+                    <div style="margin-top: 15px; text-align: center; font-size: 0.72rem; color: #777; border-top: 1px dashed #aaa; padding-top: 6px;">
+                        نظام بيجول لإدارة مراكز العيون (Begol) • تم التطوير بواسطة: آندي (Andy)
+                    </div>
+                    <script>window.onload = function() { window.print(); setTimeout(() => window.close(), 600); }<\/script>
+                </body>
+                </html>
+            `);
+            w.document.close();
+        }
+    </script>
+</body>
+</html>

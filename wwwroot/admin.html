@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">مركز حبشي للعيون - لوحة تحكم مدير النظام (Begol)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" id="bootstrapCss">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+        .top-navbar { background-color: #ffffff; border-bottom: 2px solid #e2e8f0; }
+        .admin-tab-btn { font-weight: 700; border-radius: 8px; margin: 0 2px; font-size: 0.88rem; }
+        .admin-tab-btn.active { background-color: #b91c1c !important; color: white !important; border-color: #b91c1c !important; }
+        .portal-btn { font-weight: 600; border-radius: 8px; margin: 0 2px; font-size: 0.85rem; }
+        .table-responsive { max-height: 72vh; }
+        .badge-dept { font-size: 0.8rem; padding: 5px 10px; border-radius: 6px; }
+        .card-custom { border-radius: 10px; border: 1px solid #e2e8f0; }
+        .filter-btn.active { background-color: #334155 !important; color: white !important; }
+        
+        /* صندوق مقارنة صور المرضى بالدمج */
+        .merge-avatar-box { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #cbd5e1; background: #fff; }
+        .merge-card-box { border-radius: 10px; padding: 15px; background: #ffffff; }
+
+        .begol-footer {
+            margin-top: auto;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            padding: 12px 20px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .andy-badge {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- البار العلوي -->
+    <nav class="top-navbar py-2 px-3 shadow-sm mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center">
+                <span class="fs-4 me-2 text-danger">🛡️</span>
+                <div>
+                    <h5 class="m-0 fw-bold text-dark" id="navCenterTitle">مركز حبشي التخصصي للعيون</h5>
+                    <small class="text-danger fw-bold" style="font-size: 0.75rem;" id="navSystemName">نظام بيجول (Begol) • لوحة الإدارة</small>
+                </div>
+                
+                <!-- أزرار التابات الرئيسية الخمسة -->
+                <div class="d-inline-flex mx-3 flex-wrap gap-1">
+                    <button id="tabBtnServices" class="btn btn-outline-danger admin-tab-btn active" onclick="switchTab('services')">🩺 <span id="lblTabServices">الفحوصات والأسعار</span></button>
+                    <button id="tabBtnMeds" class="btn btn-outline-danger admin-tab-btn" onclick="switchTab('meds')">💧 <span id="lblTabMeds">الأدوية والقطرات</span></button>
+                    <button id="tabBtnUsers" class="btn btn-outline-danger admin-tab-btn" onclick="switchTab('users')">👥 <span id="lblTabUsers">المستخدمين والأطباء</span></button>
+                    <button id="tabBtnInsurance" class="btn btn-outline-danger admin-tab-btn" onclick="switchTab('insurance')">🏢 <span id="lblTabInsurance">شركات التأمين والتعاقدات</span></button>
+                    <button id="tabBtnMerge" class="btn btn-outline-danger admin-tab-btn" onclick="switchTab('merge')">🔀 <span id="lblTabMerge">دمج الملفات المتكررة</span></button>
+                </div>
+
+                <!-- اختصارات التنقل للشاشات -->
+                <div class="d-inline-flex border-start ps-3 align-items-center">
+                    <span class="badge bg-secondary me-2" id="lblPortals">الشاشات:</span>
+                    <a href="/reception.html" class="btn btn-outline-primary portal-btn" id="btnRec">🌐 الاستقبال</a>
+                    <a href="/doctor.html" class="btn btn-outline-success portal-btn" id="btnDoc">👨‍⚕️ عيادة الطبيب</a>
+                    <a href="/callcenter.html" class="btn btn-outline-info portal-btn" id="btnCall">📞 الكول سنتر</a>
+                    <a href="/dilation.html" class="btn btn-outline-warning portal-btn" id="btnDil">💧 القطرات</a>
+                    <a href="/queue.html" target="_blank" class="btn btn-outline-dark portal-btn" id="btnQueue">📺 الانتظار</a>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-dark fw-bold px-2 py-1 shadow-sm" onclick="toggleLanguage()" id="btnLangToggle">🌐 English</button>
+                <span id="lblUserBadge" class="badge bg-light text-dark border p-2">👤 المدير: ...</span>
+                <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logout()" id="btnLogout">خروج 🚪</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 flex-grow-1">
+        
+        <!-- ======================================================== -->
+        <!-- 1. الفحوصات والأسعار والعمليات (Services Tab)            -->
+        <!-- ======================================================== -->
+        <div id="viewServices">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card card-custom shadow-sm bg-white">
+                        <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+                            <span id="srvFormTitle" class="text-danger">➕ تسعير خدمة / فحص جديد</span>
+                            <span id="srvBadgeStatus" class="badge bg-success">وضع إضافة</span>
+                        </div>
+                        <div class="card-body">
+                            <input type="hidden" id="srvEditId" value="0">
+                            
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold" id="lblSrvCategory">القسم التابع له:*</label>
+                                <select id="srvCategory" class="form-select form-select-sm fw-bold bg-light" onchange="onSrvCategoryChange()">
+                                    <option value="عيادة الكشف" id="optCatClinics">🏥 عيادات الكشف التخصصية</option>
+                                    <option value="وحدة الفحوصات" id="optCatScans">🔬 وحدة الفحوصات والأشعة</option>
+                                    <option value="وحدة الليزر" id="optCatLaser">⚡ وحدة الليزر والعلاج الضوئي</option>
+                                    <option value="وحدة العمليات" id="optCatSurgery">🏥 العمليات الجراحية</option>
+                                </select>
+                            </div>
+
+                            <div id="boxConsultationConfig">
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-primary" id="lblClinicSpecialty">تخصص العيادة الدقيق:*</label>
+                                    <select id="srvClinicSpecialty" class="form-select form-select-sm fw-bold" onchange="autoFillConsultationName()">
+                                        <option value="عيادة العيون العامة">عيادة العيون العامة (General)</option>
+                                        <option value="الشبكية والجسم الزجاجي">الشبكية والجسم الزجاجي (Retina)</option>
+                                        <option value="القرنية وتصحيح الإبصار">القرنية وتصحيح الإبصار (Cornea & Refractive)</option>
+                                        <option value="المياه البيضاء وزراعة العدسات">المياه البيضاء وزراعة العدسات (Cataract)</option>
+                                        <option value="المياه الزرقاء والجلوكوما">المياه الزرقاء والجلوكوما (Glaucoma)</option>
+                                        <option value="تجميل العيون وحجاج العين">تجميل العيون وحجاج العين (Oculoplastics)</option>
+                                        <option value="عيون الأطفال والحول">عيون الأطفال والحول (Pediatric & Strabismus)</option>
+                                        <option value="التهابات القزحية والمناعة">التهابات القزحية والمناعة (Uveitis)</option>
+                                        <option value="أمراض وأعصاب العين">أمراض وأعصاب العين (Neuro-Ophthalmology)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-success" id="lblVisitType">نوع الخدمة / الزيارة:*</label>
+                                    <select id="srvVisitType" class="form-select form-select-sm fw-bold border-success" onchange="autoFillConsultationName()">
+                                        <option value="كشف استشاري">كشف استشاري عيون</option>
+                                        <option value="كشف أخصائي">كشف أخصائي عيون</option>
+                                        <option value="استشارة / إعادة كشف">استشارة / إعادة كشف</option>
+                                        <option value="عرض تقرير ومتابعة">عرض تقرير / فحص متابعة</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold" id="lblCustomName">المسمى الظاهر في الإيصال والتذكرة:*</label>
+                                    <input type="text" id="srvConsultCustomName" class="form-control form-control-sm" placeholder="مثال: كشف استشاري - شبكية وجسم زجاجي">
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-success" id="lblConsultPrice">سعر الكشف (ج.م):*</label>
+                                    <input type="number" id="srvConsultPrice" class="form-control form-control-sm fw-bold text-success text-center fs-5" value="300">
+                                </div>
+
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold" id="lblFollowupPrice">سعر الاستشارة (ج.م):</label>
+                                        <input type="number" id="srvFollowupPrice" class="form-control form-control-sm text-center" value="0">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold" id="lblFollowupDays">صلاحية الاستشارة (أيام):</label>
+                                        <input type="number" id="srvFollowupDays" class="form-control form-control-sm text-center" value="14">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="boxInvestigationsConfig" style="display: none;">
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-info" id="lblInvSelect">اختر الفحص الطبي المعتمد:*</label>
+                                    <select id="srvInvestigationList" class="form-select form-select-sm fw-bold" onchange="onInvestigationSelect()">
+                                        <option value="أشعة مقطعية على الشبكية (OCT Macula)">أشعة مقطعية على الشبكية (OCT Macula)</option>
+                                        <option value="أشعة مقطعية على العصب البصري (OCT Optic Disc)">أشعة مقطعية على العصب البصري (OCT Optic Disc)</option>
+                                        <option value="أشعة مقطعية للأوعية الدموية (OCT-Angiography)">أشعة مقطعية للأوعية الدموية (OCT-Angiography)</option>
+                                        <option value="تصوير تضاريس وبنتاكام القرنية (Pentacam)">تصوير تضاريس وبنتاكام القرنية (Pentacam)</option>
+                                        <option value="فحص مجال الإبصار الكمبيوتري (Visual Field)">فحص مجال الإبصار الكمبيوتري (Visual Field)</option>
+                                        <option value="موجات فوق صوتية على العين (B-Scan Ultrasound)">موجات فوق صوتية على العين (B-Scan Ultrasound)</option>
+                                        <option value="حساب قوة العدسة داخل العين (Biometry / IOL Master)">حساب قوة العدسة (IOL Master / Biometry)</option>
+                                        <option value="تصوير قاع العين بصبغة الفلورسين (FFA)">تصوير قاع العين بصبغة الفلورسين (FFA)</option>
+                                        <option value="CUSTOM">➕ فحص مخصص آخر (اكتب يدوياً)...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2" id="divCustomInvName" style="display: none;">
+                                    <label class="form-label small fw-bold">اسم الفحص المخصص:*</label>
+                                    <input type="text" id="srvCustomInvInput" class="form-control form-control-sm" placeholder="اكتب اسم الفحص بدقة">
+                                </div>
+                            </div>
+
+                            <div id="boxLaserConfig" style="display: none;">
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-danger" id="lblLaserSelect">اختر نوع إجراء الليزر:*</label>
+                                    <select id="srvLaserList" class="form-select form-select-sm fw-bold" onchange="onLaserSelect()">
+                                        <option value="أرجون ليزر على الشبكية (Argon Laser PRP)">أرجون ليزر على الشبكية (Argon Laser PRP)</option>
+                                        <option value="أرجون ليزر شبكية موضعي (Focal Argon)">أرجون ليزر شبكية موضعي (Focal Argon)</option>
+                                        <option value="ياج ليزر مسح محفظة خلفية (YAG Capsulotomy)">ياج ليزر مسح محفظة خلفية (YAG Capsulotomy)</option>
+                                        <option value="ياج ليزر ثقب القزحية (YAG Laser PI)">ياج ليزر ثقب القزحية (YAG Laser PI)</option>
+                                        <option value="ليزر سلكتيف للجلوكوما (SLT Trabeculoplasty)">ليزر سلكتيف للجلوكوما (SLT Trabeculoplasty)</option>
+                                        <option value="تثبيت قرنية ضوئي مع رايبوفلافين (Cross-Linking - CXL)">تثبيت قرنية ضوئي بالرايبوفلافين (CXL)</option>
+                                        <option value="تصحيح إبصار فيمتو ليزك (Femto-LASIK)">تصحيح إبصار فيمتو ليزك (Femto-LASIK)</option>
+                                        <option value="CUSTOM">➕ إجراء ليزر مخصص آخر (اكتب يدوياً)...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2" id="divCustomLaserName" style="display: none;">
+                                    <label class="form-label small fw-bold">اسم إجراء الليزر المخصص:*</label>
+                                    <input type="text" id="srvCustomLaserInput" class="form-control form-control-sm" placeholder="اكتب اسم إجراء الليزر">
+                                </div>
+                            </div>
+
+                            <div id="boxSurgeryConfig" style="display: none;">
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-success" id="lblSurgerySelect">اختر العملية الجراحية المقررة:*</label>
+                                    <select id="srvSurgeryList" class="form-select form-select-sm fw-bold" onchange="onSurgerySelect()">
+                                        <option value="إزالة مياه بيضاء وزرع عدسة رخوة بالفاكو (Phaco)">إزالة مياه بيضاء وزرع عدسة رخوة بالفاكو (Phaco)</option>
+                                        <option value="إزالة مياه بيضاء بالفيمتو وزرع عدسة متعددة البؤر (FLACS)">إزالة مياه بيضاء بالفيمتو وزرع عدسة ممتازة (FLACS)</option>
+                                        <option value="زرع عدسة توريك لتصحيح الاستجماتيزم (Toric IOL)">زرع عدسة توريك للاستجماتيزم (Toric IOL)</option>
+                                        <option value="استئصال الجسم الزجاجي وعلاج انفصال الشبكية (Vitrectomy)">استئصال زجاجي وانفصال شبكية (Vitrectomy)</option>
+                                        <option value="حقن مادة داخل العين (Anti-VEGF Injection)">حقن مادة داخل العين (Anti-VEGF Injection)</option>
+                                        <option value="ترقيع قرنية كلي نافذ (زراعة قرنية PKP)">ترقيع قرنية كلي نافذ (زراعة قرنية PKP)</option>
+                                        <option value="زرع عدسات ICL لتصحيح قصر النظر الشديد">زرع عدسات تصحيح قصر النظر (ICL)</option>
+                                        <option value="عملية إصلاح الحول وتقويم عضلات العين (Strabismus)">عملية تقويم عضلات العين وإصلاح الحول</option>
+                                        <option value="CUSTOM">➕ عملية جراحية مخصصة أخرى...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2" id="divCustomSurgeryName" style="display: none;">
+                                    <label class="form-label small fw-bold">اسم العملية المخصصة:*</label>
+                                    <input type="text" id="srvCustomSurgeryInput" class="form-control form-control-sm" placeholder="اكتب اسم العملية الجراحية بدقة">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-success" id="lblSurgeryPrice">سعر وتكلفة العملية الإجمالية (ج.م):*</label>
+                                    <input type="number" id="srvSurgeryPrice" class="form-control form-control-sm fw-bold text-success text-center fs-5" value="6000">
+                                </div>
+                            </div>
+
+                            <div id="boxEyeProceduresPricing" style="display: none;">
+                                <div class="p-2 mb-2 rounded border" style="background-color: #f0fdf4; border-color: #bbf7d0 !important;">
+                                    <label class="form-label small fw-bold text-dark mb-1" id="lblSingleEyePrice">سعر عين واحدة (OD / OS):*</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" id="srvPriceSingle" class="form-control fw-bold text-success text-center fs-6" placeholder="مثلاً: 1250" oninput="autoSuggestBothPrice()">
+                                        <span class="input-group-text" id="cur1">ج.م</span>
+                                    </div>
+                                </div>
+
+                                <div class="p-2 mb-2 rounded border" style="background-color: #fefce8; border-color: #fde68a !important;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label small fw-bold text-dark m-0" id="lblBothEyesPrice">سعر كلتا العينين (OU):*</label>
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" style="font-size: 0.75rem;" onclick="applyDoublePrice()" id="btnDoublePrice">مضاعفة (×2)</button>
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" id="srvPriceBoth" class="form-control fw-bold text-primary text-center fs-6" placeholder="مثلاً: 1800">
+                                        <span class="input-group-text" id="cur2">ج.م</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 mt-3 pt-2 border-top">
+                                <button type="button" class="btn btn-outline-secondary fw-bold px-3" onclick="resetSrvForm()" id="btnSrvNew">➕ جديد</button>
+                                <button type="button" id="btnSaveNewSrv" class="btn btn-success flex-grow-1 fw-bold" onclick="saveService('CREATE')">💾 حفظ وتسعير</button>
+                                <button type="button" id="btnUpdateSrv" class="btn btn-primary flex-grow-1 fw-bold" onclick="saveService('UPDATE')" style="display: none;">✏️ حفظ التعديل</button>
+                                <button type="button" id="btnDeleteSrv" class="btn btn-outline-danger fw-bold" onclick="deleteService(document.getElementById('srvEditId').value)" style="display: none;">🗑️ حذف</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card card-custom shadow-sm bg-white">
+                        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
+                            <span class="text-dark" id="srvTableTitle">📋 قائمة الفحوصات والخدمات والعمليات المعتمدة</span>
+                            
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary filter-btn active" onclick="filterServices('الكل', this)" id="fltAll">الكل</button>
+                                <button class="btn btn-outline-secondary filter-btn" onclick="filterServices('عيادة الكشف', this)" id="fltClinics">عيادة الكشف</button>
+                                <button class="btn btn-outline-secondary filter-btn" onclick="filterServices('وحدة الفحوصات', this)" id="fltInv">وحدة الفحوصات</button>
+                                <button class="btn btn-outline-secondary filter-btn" onclick="filterServices('وحدة الليزر', this)" id="fltLaser">وحدة الليزر</button>
+                                <button class="btn btn-outline-secondary filter-btn" onclick="filterServices('وحدة العمليات', this)" id="fltSurgery">العمليات</button>
+                            </div>
+
+                            <button class="btn btn-sm btn-outline-secondary" onclick="loadServices()" id="btnRefreshSrv">🔄 تحديث</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered text-center m-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th id="thDept">القسم</th>
+                                            <th id="thServiceName">اسم الخدمة / الفحص</th>
+                                            <th id="thPricing">التسعير المعتمد (ج.م)</th>
+                                            <th id="thDetails">تفاصيل وضوابط</th>
+                                            <th id="thActions">إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="srvTableBody">
+                                        <tr><td colspan="5" class="text-muted py-4">جاري التحميل...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- 2. تاب الأدوية والقطرات (Medications Tab)                -->
+        <!-- ======================================================== -->
+        <div id="viewMeds" style="display: none;">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card card-custom shadow-sm bg-white">
+                        <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+                            <span id="medFormTitle" class="text-danger">➕ إضافة دواء / قطرة جديدة</span>
+                            <span id="medBadgeStatus" class="badge bg-success">وضع إضافة</span>
+                        </div>
+                        <div class="card-body">
+                            <input type="hidden" id="medEditId" value="0">
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblMedTradeName">اسم الدواء التجاري:*</label>
+                                <input type="text" id="medTradeName" class="form-control form-control-sm" placeholder="مثلاً: Tobradex / Hyabak">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblMedCategory">التصنيف الطبي:</label>
+                                <input type="text" id="medCategory" class="form-control form-control-sm" placeholder="مضاد حيوي / قطرة مرطبة">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblMedDose">الجرعة والتكرار الافتراضي:*</label>
+                                <input type="text" id="medDefaultDose" class="form-control form-control-sm" placeholder="نقطة 4 مرات يومياً">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold" id="lblMedInstructions">إرشادات ومعايير الاستعمال:</label>
+                                <input type="text" id="medInstructions" class="form-control form-control-sm" placeholder="رج جيداً / حفظ بالثلاجة">
+                            </div>
+
+                            <div class="d-flex gap-2 mt-3 pt-2 border-top">
+                                <button type="button" class="btn btn-outline-secondary fw-bold px-3" onclick="resetMedForm()" id="btnMedNew">➕ جديد</button>
+                                <button type="button" id="btnSaveNewMed" class="btn btn-success flex-grow-1 fw-bold" onclick="saveMedication('CREATE')">💾 حفظ الدواء</button>
+                                <button type="button" id="btnUpdateMed" class="btn btn-primary flex-grow-1 fw-bold" onclick="saveMedication('UPDATE')" style="display: none;">✏️ حفظ التعديل</button>
+                                <button type="button" id="btnDeleteMed" class="btn btn-outline-danger fw-bold" onclick="deleteMedication(document.getElementById('medEditId').value)" style="display: none;">🗑️ حذف</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card card-custom shadow-sm bg-white">
+                        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center py-3">
+                            <span id="medTableTitle">💊 قائمة الأدوية والقطرات المسجلة</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="loadMedications()" id="btnRefreshMeds">🔄 تحديث</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered text-center m-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>اسم الدواء</th>
+                                            <th>التصنيف</th>
+                                            <th>الجرعة الافتراضية</th>
+                                            <th>إرشادات الاستعمال</th>
+                                            <th>إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="medTableBody">
+                                        <tr><td colspan="5" class="text-muted py-4">جاري التحميل...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- 3. تاب المستخدمين والأطباء (Users Tab)                   -->
+        <!-- ======================================================== -->
+        <div id="viewUsers" style="display: none;">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card card-custom shadow-sm bg-white">
+                        <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+                            <span id="userFormTitle" class="text-danger">➕ إضافة مستخدم / طبيب جديد</span>
+                            <span id="userBadgeStatus" class="badge bg-success">وضع إضافة</span>
+                        </div>
+                        <div class="card-body">
+                            <input type="hidden" id="userEditId" value="0">
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblUUsername">اسم الدخول (Username):*</label>
+                                <input type="text" id="uUsername" class="form-control form-control-sm">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblUPassword">كلمة المرور:*</label>
+                                <input type="password" id="uPassword" class="form-control form-control-sm" placeholder="•••••••• (اتركها فارغة لعدم التغيير)">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblUFullName">الاسم ثلاثي:*</label>
+                                <input type="text" id="uFullName" class="form-control form-control-sm" placeholder="د. أحمد محمود">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblURole">الدور والصلاحية:*</label>
+                                <select id="uRoleName" class="form-select form-select-sm fw-bold" onchange="checkRoleDoctor()">
+                                    <option value="Consultant">👨‍⚕️ استشاري عيون (Consultant)</option>
+                                    <option value="Specialist">🩺 أخصائي عيون (Specialist)</option>
+                                    <option value="Resident">👨‍🔬 طبيب نائب / تحضير حالات (Resident)</option>
+                                    <option value="Reception">🏢 موظف استقبال (Reception)</option>
+                                    <option value="CallCenter">📞 موظف كول سنتر (CallCenter)</option>
+                                    <option value="Dilation">💧 موظف قطرات وتوسيع (Dilation)</option>
+                                    <option value="Admin">🛡️ مدير نظام كامل (Admin)</option>
+                                </select>
+                            </div>
+                            
+                            <div id="doctorScopeBox" class="mb-2">
+                                <label class="form-label small fw-bold text-primary" id="lblUDoctorScope">طبيعة عمل الطبيب:*</label>
+                                <select id="uDoctorScope" class="form-select form-select-sm fw-bold">
+                                    <option value="كشوفات وفحوصات">كشوفات عيادة + فحوصات وأشعة معاً</option>
+                                    <option value="كشوفات فقط">كشوفات عيادة فقط</option>
+                                    <option value="فحوصات فقط">أخصائي / استشاري فحوصات وأشعة فقط</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblUTitle">الدرجة والتخصص الدقيق:</label>
+                                <input type="text" id="uTitle" class="form-control form-control-sm" placeholder="استشاري جراحة الشبكية">
+                            </div>
+
+                            <!-- تحديد الشاشات المصرح له بفتحها (جديد ومهم) -->
+                            <div class="p-2 mb-3 bg-light border rounded">
+                                <label class="form-label small fw-bold text-dark d-block mb-1">🔐 الشاشات المصرح بفتحها لهذا المستخدم:</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="chkScrReception" value="reception" checked>
+                                    <label class="form-check-label small" for="chkScrReception">الاستقبال</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="chkScrDoctor" value="doctor" checked>
+                                    <label class="form-check-label small" for="chkScrDoctor">عيادة الطبيب</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="chkScrCall" value="callcenter">
+                                    <label class="form-check-label small" for="chkScrCall">الكول سنتر</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="chkScrDilation" value="dilation">
+                                    <label class="form-check-label small" for="chkScrDilation">القطرات</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="chkScrAdmin" value="admin">
+                                    <label class="form-check-label small" for="chkScrAdmin">الإدارة</label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 mt-3 pt-2 border-top">
+                                <button type="button" class="btn btn-outline-secondary fw-bold px-3" onclick="resetUserForm()" id="btnUNew">➕ جديد</button>
+                                <button type="button" id="btnSaveNewUser" class="btn btn-success flex-grow-1 fw-bold" onclick="saveUser('CREATE')">💾 حفظ المستخدم</button>
+                                <button type="button" id="btnUpdateUser" class="btn btn-primary flex-grow-1 fw-bold" onclick="saveUser('UPDATE')" style="display: none;">✏️ حفظ التعديل</button>
+                                <button type="button" id="btnDeleteUser" class="btn btn-outline-danger fw-bold" onclick="deleteUser(document.getElementById('userEditId').value)" style="display: none;">🗑️ حذف</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card card-custom shadow-sm bg-white">
+                        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center py-3">
+                            <span id="userTableTitle">👥 سجل المستخدمين، الأطباء، وتوزيع الصلاحيات</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="loadUsers()" id="btnRefreshUsers">🔄 تحديث</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered text-center m-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>اسم الدخول</th>
+                                            <th>الاسم</th>
+                                            <th>الدور والصلاحية</th>
+                                            <th>طبيعة العمل</th>
+                                            <th>الشاشات المصرح بها</th>
+                                            <th>إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="userTableBody">
+                                        <tr><td colspan="6" class="text-muted py-4">جاري التحميل...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- 4. شركات التأمين والتعاقدات (Insurance Tab)              -->
+        <!-- ======================================================== -->
+        <div id="viewInsurance" style="display: none;">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card card-custom shadow-sm bg-white">
+                        <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+                            <span id="insFormTitle" class="text-danger">➕ إضافة جهة / شركة تأمين</span>
+                            <span id="insBadgeStatus" class="badge bg-success">وضع إضافة</span>
+                        </div>
+                        <div class="card-body">
+                            <input type="hidden" id="insEditId" value="0">
+                            
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblInsNameAr">اسم شركة التأمين / الهيئة (بالعربي):*</label>
+                                <input type="text" id="insNameAr" class="form-control form-control-sm" placeholder="مثلاً: أكسا / نقابة المهندسين / بنك مصر">
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold" id="lblInsNameEn">اسم الشركة بالإنجليزي (Company Name EN):</label>
+                                <input type="text" id="insNameEn" class="form-control form-control-sm" placeholder="e.g. AXA Insurance">
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold text-success" id="lblInsDefaultCopay">نسبة التحمل الافتراضية للعقد (%):*</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" id="insDefaultCopay" class="form-control fw-bold text-center text-success" value="10%" placeholder="10% أو 20% أو معفي 0%">
+                                    <span class="input-group-text" id="lblCopaySign">تحمل</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold" id="lblInsNotes">ملاحظات وشروط التعاقد والموافقة المسبقة:</label>
+                                <textarea id="insNotes" class="form-control form-control-sm" rows="3" placeholder="ملاحظات العقد..."></textarea>
+                            </div>
+
+                            <div class="d-flex gap-2 mt-3 pt-2 border-top">
+                                <button type="button" class="btn btn-outline-secondary fw-bold px-3" onclick="resetInsForm()" id="btnInsNew">➕ جديد</button>
+                                <button type="button" id="btnSaveNewIns" class="btn btn-success flex-grow-1 fw-bold" onclick="saveInsurance('CREATE')">💾 حفظ التعاقد</button>
+                                <button type="button" id="btnUpdateIns" class="btn btn-primary flex-grow-1 fw-bold" onclick="saveInsurance('UPDATE')" style="display: none;">✏️ حفظ التعديل</button>
+                                <button type="button" id="btnDeleteIns" class="btn btn-outline-danger fw-bold" onclick="deleteInsurance(document.getElementById('insEditId').value)" style="display: none;">🗑️ حذف</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card card-custom shadow-sm bg-white">
+                        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center py-3">
+                            <span id="insTableTitle">🏢 قائمة شركات التأمين والهيئات والتعاقدات المعتمدة</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="loadInsurance()" id="btnRefreshIns">🔄 تحديث</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered text-center m-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th id="thInsNameAr">الجهة / الشركة (عربي)</th>
+                                            <th id="thInsNameEn">الاسم بالإنجليزي</th>
+                                            <th id="thInsCopay">نسبة التحمل</th>
+                                            <th id="thInsNotes">شروط وملاحظات العقد</th>
+                                            <th id="thInsActions">إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="insTableBody">
+                                        <tr><td colspan="5" class="text-muted py-4">جاري التحميل...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- 5. تاب أداة دمج ملفات المرضى المتكررة مع الصور المقارنة   -->
+        <!-- ======================================================== -->
+        <div id="viewMerge" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card card-custom shadow-sm bg-white border-primary">
+                        <div class="card-header bg-primary text-white py-3">
+                            <h5 class="m-0 fw-bold" id="mergeCardTitle">🔀 أداة دمج ملفات المرضى المتكررة ونقل السجلات الطبية</h5>
+                            <small id="mergeCardSub">صلاحية أمنية للمشرف العام فقط لمقارنة صور وملفات المرضى ودمجها</small>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="alert alert-warning border-warning" id="mergeAlertText">
+                                <strong>⚠️ تنبيه هام:</strong> هذه العملية نهائية، ستقوم بنقل كافة الزيارات وتذاكر الكشف، الأشعة، الفحوصات، تقارير الليزر، العمليات، ومرفقات السكانر من الملف المكرر إلى الملف الأصلي، مع أرشفة الملف المكرر لمنع استخدامه مجدداً.
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <!-- الملف الأصلي الأساسي -->
+                                <div class="col-md-6">
+                                    <div class="merge-card-box border border-2 border-success shadow-sm">
+                                        <label class="form-label fw-bold text-success" id="lblMasterFile">1. كود الملف الأصلي الأساسي (Master File):*</label>
+                                        <div class="input-group mb-2">
+                                            <input type="number" id="txtMasterId" class="form-control fw-bold text-center fs-5 border-success" placeholder="مثال: 1" oninput="previewPatientForMerge('master')">
+                                            <button class="btn btn-success fw-bold" type="button" onclick="previewPatientForMerge('master')">فحص</button>
+                                        </div>
+                                        
+                                        <!-- كارت المعاينة بالصورة -->
+                                        <div class="d-flex align-items-center gap-3 p-2 bg-light rounded border">
+                                            <img id="imgMasterPhoto" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' fill='%2394a3b8' viewBox='0 0 16 16'><path d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z'/></svg>" class="merge-avatar-box shadow-sm" alt="Master Avatar">
+                                            <div>
+                                                <div id="previewMasterName" class="fw-bold text-dark fs-6">اسم المريض: --</div>
+                                                <small id="previewMasterDetails" class="text-muted d-block">الرقم القومي: -- | الهاتف: --</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- الملف المكرر المراد دمجه -->
+                                <div class="col-md-6">
+                                    <div class="merge-card-box border border-2 border-danger shadow-sm">
+                                        <label class="form-label fw-bold text-danger" id="lblDupFile">2. كود الملف المكرر المراد نقله وإلغاؤه (Duplicate File):*</label>
+                                        <div class="input-group mb-2">
+                                            <input type="number" id="txtDuplicateId" class="form-control fw-bold text-center fs-5 border-danger" placeholder="مثال: 2" oninput="previewPatientForMerge('duplicate')">
+                                            <button class="btn btn-danger fw-bold" type="button" onclick="previewPatientForMerge('duplicate')">فحص</button>
+                                        </div>
+
+                                        <!-- كارت المعاينة بالصورة -->
+                                        <div class="d-flex align-items-center gap-3 p-2 bg-light rounded border">
+                                            <img id="imgDuplicatePhoto" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' fill='%2394a3b8' viewBox='0 0 16 16'><path d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z'/></svg>" class="merge-avatar-box shadow-sm" alt="Duplicate Avatar">
+                                            <div>
+                                                <div id="previewDuplicateName" class="fw-bold text-danger fs-6">اسم المريض: --</div>
+                                                <small id="previewDuplicateDetails" class="text-muted d-block">الرقم القومي: -- | الهاتف: --</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="button" class="btn btn-danger btn-lg fw-bold px-5 py-3 shadow" onclick="executeMergePatients()" id="btnExecuteMerge">
+                                    🔀 بدء الدمج ونقل كل السجلات الطبية بالكامل
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- الفوتر الرسمي -->
+    <footer class="begol-footer">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong class="text-dark">👁️ نظام بيجول (Begol Eye System)</strong>
+                <span class="mx-1">•</span>
+                <span id="ftCenterName">مركز حبشي التخصصي للعيون</span>
+                <span class="mx-1">•</span>
+                <span class="text-muted" id="ftRights">جميع الحقوق محفوظة © 2026</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="me-2" id="ftDevBy">تم التطوير والبرمجة بواسطة:</span>
+                <span class="andy-badge">آندي (Andy)</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let servicesData = [];
+        let medsData = [];
+        let usersData = [];
+        let insuranceData = [];
+        let currentSrvFilter = 'الكل';
+        let currentLanguage = localStorage.getItem('begol_lang') || 'ar';
+
+        const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' fill='%2394a3b8' viewBox='0 0 16 16'><path d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z'/></svg>";
+
+        const i18n = {
+            ar: {
+                pageTitle: 'مركز حبشي للعيون - لوحة تحكم مدير النظام (Begol)',
+                navCenterTitle: 'مركز حبشي التخصصي للعيون',
+                navSystemName: 'نظام بيجول (Begol) • لوحة الإدارة',
+                btnLangToggle: '🌐 English',
+                lblTabServices: 'الفحوصات والأسعار',
+                lblTabMeds: 'الأدوية والقطرات',
+                lblTabUsers: 'المستخدمين والأطباء',
+                lblTabInsurance: 'شركات التأمين والتعاقدات',
+                lblTabMerge: 'دمج الملفات المتكررة',
+                lblPortals: 'الشاشات:',
+                btnRec: '🌐 الاستقبال',
+                btnDoc: '👨‍⚕️ عيادة الطبيب',
+                btnCall: '📞 الكول سنتر',
+                btnDil: '💧 القطرات',
+                btnQueue: '📺 الانتظار',
+                btnLogout: 'خروج 🚪',
+                srvFormTitle: '➕ تسعير خدمة / فحص جديد',
+                lblSrvCategory: 'القسم التابع له:*',
+                optCatClinics: '🏥 عيادات الكشف التخصصية',
+                optCatScans: '🔬 وحدة الفحوصات والأشعة',
+                optCatLaser: '⚡ وحدة الليزر والعلاج الضوئي',
+                optCatSurgery: '🏥 العمليات الجراحية',
+                lblClinicSpecialty: 'تخصص العيادة الدقيق:*',
+                lblVisitType: 'نوع الخدمة / الزيارة:*',
+                lblCustomName: 'المسمى الظاهر في الإيصال والتذكرة:*',
+                lblConsultPrice: 'سعر الكشف (ج.م):*',
+                lblFollowupPrice: 'سعر الاستشارة (ج.م):',
+                lblFollowupDays: 'صلاحية الاستشارة (أيام):',
+                lblInvSelect: 'اختر الفحص الطبي المعتمد:*',
+                lblLaserSelect: 'اختر نوع إجراء الليزر:*',
+                lblSurgerySelect: 'اختر العملية الجراحية المقررة:*',
+                lblSurgeryPrice: 'سعر وتكلفة العملية الإجمالية (ج.م):*',
+                lblSingleEyePrice: 'سعر عين واحدة (OD / OS):*',
+                lblBothEyesPrice: 'سعر كلتا العينين (OU):*',
+                btnDoublePrice: 'مضاعفة (×2)',
+                cur1: 'ج.م',
+                cur2: 'ج.م',
+                btnSrvNew: '➕ جديد',
+                btnSaveNewSrv: '💾 حفظ وتسعير',
+                btnUpdateSrv: '✏️ حفظ التعديل',
+                btnDeleteSrv: '🗑️ حذف',
+                srvTableTitle: '📋 قائمة الفحوصات والخدمات والعمليات المعتمدة',
+                fltAll: 'الكل',
+                fltClinics: 'عيادة الكشف',
+                fltInv: 'وحدة الفحوصات',
+                fltLaser: 'وحدة الليزر',
+                fltSurgery: 'العمليات',
+                btnRefreshSrv: '🔄 تحديث',
+                thDept: 'القسم',
+                thServiceName: 'اسم الخدمة / الفحص',
+                thPricing: 'التسعير المعتمد (ج.م)',
+                thDetails: 'تفاصيل وضوابط',
+                thActions: 'إجراءات',
+                medFormTitle: '➕ إضافة دواء / قطرة جديدة',
+                lblMedTradeName: 'اسم الدواء التجاري:*',
+                lblMedCategory: 'التصنيف الطبي:',
+                lblMedDose: 'الجرعة والتكرار الافتراضي:*',
+                lblMedInstructions: 'إرشادات ومعايير الاستعمال:',
+                btnMedNew: '➕ جديد',
+                btnSaveNewMed: '💾 حفظ الدواء',
+                btnUpdateMed: '✏️ حفظ التعديل',
+                btnDeleteMed: '🗑️ حذف',
+                medTableTitle: '💊 قائمة الأدوية والقطرات المسجلة',
+                btnRefreshMeds: '🔄 تحديث',
+                thMedName: 'اسم الدواء',
+                thMedCat: 'التصنيف',
+                thMedDose: 'الجرعة الافتراضية',
+                thMedInstr: 'إرشادات الاستعمال',
+                thMedActions: 'إجراءات',
+                userFormTitle: '➕ إضافة مستخدم / طبيب جديد',
+                lblUUsername: 'اسم الدخول (Username):*',
+                lblUPassword: 'كلمة المرور:*',
+                lblUFullName: 'الاسم ثلاثي:*',
+                lblURole: 'الدور والصلاحية:*',
+                lblUDoctorScope: 'طبيعة عمل الطبيب:*',
+                lblUTitle: 'الدرجة والتخصص الدقيق:',
+                btnUNew: '➕ جديد',
+                btnSaveNewUser: '💾 حفظ المستخدم',
+                btnUpdateUser: '✏️ حفظ التعديل',
+                btnDeleteUser: '🗑️ حذف',
+                userTableTitle: '👥 سجل المستخدمين، الأطباء، وتوزيع الصلاحيات',
+                btnRefreshUsers: '🔄 تحديث',
+                insFormTitle: '➕ إضافة جهة / شركة تأمين',
+                lblInsNameAr: 'اسم شركة التأمين / الهيئة (بالعربي):*',
+                lblInsNameEn: 'اسم الشركة بالإنجليزي (Company Name EN):',
+                lblInsDefaultCopay: 'نسبة التحمل الافتراضية للعقد (%):*',
+                lblCopaySign: 'تحمل',
+                lblInsNotes: 'ملاحظات وشروط التعاقد والموافقة المسبقة:',
+                btnInsNew: '➕ جديد',
+                btnSaveNewIns: '💾 حفظ التعاقد',
+                btnUpdateIns: '✏️ حفظ التعديل',
+                btnDeleteIns: '🗑️ حذف',
+                insTableTitle: '🏢 قائمة شركات التأمين والهيئات والتعاقدات المعتمدة',
+                btnRefreshIns: '🔄 تحديث',
+                thInsNameAr: 'الجهة / الشركة (عربي)',
+                thInsNameEn: 'الاسم بالإنجليزي',
+                thInsCopay: 'نسبة التحمل',
+                thInsNotes: 'شروط وملاحظات العقد',
+                thInsActions: 'إجراءات',
+                mergeCardTitle: '🔀 أداة دمج ملفات المرضى المتكررة ونقل السجلات الطبية',
+                mergeCardSub: 'صلاحية أمنية خاصة بالمشرف العام لحل مشكلة الملفات المكررة',
+                mergeAlertText: '⚠️ تنبيه هام: هذه العملية نهائية، ستقوم بنقل كافة الزيارات وتذاكر الكشف، الأشعة، الفحوصات، تقارير الليزر، العمليات، ومرفقات السكانر من الملف المكرر إلى الملف الأصلي، مع أرشفة الملف المكرر لمنع استخدامه مجدداً.',
+                lblMasterFile: '1. كود الملف الأصلي الأساسي (Master File):*',
+                lblDupFile: '2. كود الملف المكرر المراد نقله وإلغاؤه (Duplicate File):*',
+                btnExecuteMerge: '🔀 بدء الدمج ونقل كل السجلات الطبية بالكامل',
+                ftCenterName: 'مركز حبشي التخصصي للعيون',
+                ftRights: 'جميع الحقوق محفوظة © 2026',
+                ftDevBy: 'تم التطوير والبرمجة بواسطة:'
+            },
+            en: {
+                pageTitle: 'Habashy Eye Center - Admin Dashboard (Begol)',
+                navCenterTitle: 'Habashy Specialized Eye Center',
+                navSystemName: 'Begol System • Admin Dashboard',
+                btnLangToggle: '🌐 عربي',
+                lblTabServices: 'Services & Pricing',
+                lblTabMeds: 'Medications & Drops',
+                lblTabUsers: 'Users & Doctors',
+                lblTabInsurance: 'Insurance & Contracts',
+                lblTabMerge: 'Merge Patient Files',
+                lblPortals: 'Portals:',
+                btnRec: '🌐 Reception',
+                btnDoc: '👨‍⚕️ Doctor',
+                btnCall: '📞 Call Center',
+                btnDil: '💧 Drops',
+                btnQueue: '📺 Queue',
+                btnLogout: 'Logout 🚪',
+                srvFormTitle: '➕ Add / Price New Service',
+                lblSrvCategory: 'Department:*',
+                optCatClinics: '🏥 Consultation Clinics',
+                optCatScans: '🔬 Diagnostic Scans Unit',
+                optCatLaser: '⚡ Retina & Laser Unit',
+                optCatSurgery: '🏥 Surgical Unit (OR)',
+                lblClinicSpecialty: 'Clinic Subspecialty:*',
+                lblVisitType: 'Visit Nature:*',
+                lblCustomName: 'Ticket & Receipt Name:*',
+                lblConsultPrice: 'Consultation Fee (EGP):*',
+                lblFollowupPrice: 'Follow-up Fee (EGP):',
+                lblFollowupDays: 'Follow-up Validity (Days):',
+                lblInvSelect: 'Select Standard Diagnostic Scan:*',
+                lblLaserSelect: 'Select Laser Procedure:*',
+                lblSurgerySelect: 'Select Surgical Procedure:*',
+                lblSurgeryPrice: 'Total Surgery Fee (EGP):*',
+                lblSingleEyePrice: 'Single Eye Fee (OD / OS):*',
+                lblBothEyesPrice: 'Both Eyes Package (OU):*',
+                btnDoublePrice: 'Double (×2)',
+                cur1: 'EGP',
+                cur2: 'EGP',
+                btnSrvNew: '➕ New',
+                btnSaveNewSrv: '💾 Save & Price',
+                btnUpdateSrv: '✏️ Save Changes',
+                btnDeleteSrv: '🗑️ Delete',
+                srvTableTitle: '📋 Approved Services, Scans & Surgeries',
+                fltAll: 'All',
+                fltClinics: 'Clinics',
+                fltInv: 'Scans',
+                fltLaser: 'Laser',
+                fltSurgery: 'Surgeries',
+                btnRefreshSrv: '🔄 Refresh',
+                thDept: 'Department',
+                thServiceName: 'Service / Procedure Name',
+                thPricing: 'Approved Pricing',
+                thDetails: 'Details & Terms',
+                thActions: 'Actions',
+                medFormTitle: '➕ Add New Eye Drop / Drug',
+                lblMedTradeName: 'Trade Name:*',
+                lblMedCategory: 'Medical Category:',
+                lblMedDose: 'Default Dose & Frequency:*',
+                lblMedInstructions: 'Usage Instructions:',
+                btnMedNew: '➕ New',
+                btnSaveNewMed: '💾 Save Drug',
+                btnUpdateMed: '✏️ Save Changes',
+                btnDeleteMed: '🗑️ Delete',
+                medTableTitle: '💊 Registered Eye Drops & Medications',
+                btnRefreshMeds: '🔄 Refresh',
+                thMedName: 'Drug Name',
+                thMedCat: 'Category',
+                thMedDose: 'Default Dose',
+                thMedInstr: 'Instructions',
+                thMedActions: 'Actions',
+                userFormTitle: '➕ Add New User / Doctor',
+                lblUUsername: 'Username:*',
+                lblUPassword: 'Password:*',
+                lblUFullName: 'Full Name:*',
+                lblURole: 'Role & Permissions:*',
+                lblUDoctorScope: 'Doctor Scope:*',
+                lblUTitle: 'Degree / Subspecialty:',
+                btnUNew: '➕ New',
+                btnSaveNewUser: '💾 Save User',
+                btnUpdateUser: '✏️ Save Changes',
+                btnDeleteUser: '🗑️ Delete',
+                userTableTitle: '👥 Users, Doctors & Permissions List',
+                btnRefreshUsers: '🔄 Refresh',
+                insFormTitle: '➕ Add Insurance / Corporate',
+                lblInsNameAr: 'Company Name (Arabic):*',
+                lblInsNameEn: 'Company Name (English):',
+                lblInsDefaultCopay: 'Default Co-pay (%):*',
+                lblCopaySign: 'Co-pay',
+                lblInsNotes: 'Contract Terms & Pre-Approval Notes:',
+                btnInsNew: '➕ New',
+                btnSaveNewIns: '💾 Save Contract',
+                btnUpdateIns: '✏️ Save Changes',
+                btnDeleteIns: '🗑️ Delete',
+                insTableTitle: '🏢 Approved Insurance Companies & Contracts',
+                btnRefreshIns: '🔄 Refresh',
+                thInsNameAr: 'Company (Arabic)',
+                thInsNameEn: 'Company (English)',
+                thInsCopay: 'Co-pay',
+                thInsNotes: 'Contract Notes',
+                thInsActions: 'Actions',
+                mergeCardTitle: '🔀 Merge Duplicate Patient Records Tool',
+                mergeCardSub: 'Security Tool for System Admin to Solve Duplications',
+                mergeAlertText: '⚠️ Warning: This action is permanent. All records will be merged into master file and duplicate will be archived.',
+                lblMasterFile: '1. Master Patient ID:*',
+                lblDupFile: '2. Duplicate Patient ID to Archive:*',
+                btnExecuteMerge: '🔀 Execute Merge & Transfer All History',
+                ftCenterName: 'Habashy Specialized Eye Center',
+                ftRights: 'All Rights Reserved © 2026',
+                ftDevBy: 'Developed & Engineered by:'
+            }
+        };
+
+        window.onload = function() {
+            document.getElementById('lblUserBadge').innerText = `👤 ${sessionStorage.getItem('fullName') || 'مدير النظام'} (Admin)`;
+            applyLanguage(currentLanguage);
+
+            switchTab('services');
+            onSrvCategoryChange();
+            autoFillConsultationName();
+
+            loadServices();
+            loadMedications();
+            loadUsers();
+            loadInsurance();
+        };
+
+        function logout() { sessionStorage.clear(); window.location.href = '/index.html'; }
+
+        function toggleLanguage() {
+            currentLanguage = (currentLanguage === 'ar') ? 'en' : 'ar';
+            localStorage.setItem('begol_lang', currentLanguage);
+            applyLanguage(currentLanguage);
+        }
+
+        function applyLanguage(lang) {
+            const isAr = (lang === 'ar');
+            const htmlRoot = document.getElementById('htmlRoot');
+            const bootstrapCss = document.getElementById('bootstrapCss');
+
+            htmlRoot.setAttribute('lang', isAr ? 'ar' : 'en');
+            htmlRoot.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+            bootstrapCss.href = isAr 
+                ? "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css"
+                : "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css";
+
+            const dict = i18n[lang];
+            for (const [id, text] of Object.entries(dict)) {
+                const el = document.getElementById(id);
+                if (el) el.innerText = text;
+            }
+
+            renderServicesTable();
+            renderMedicationsTable();
+            renderUsersTable();
+            renderInsuranceTable();
+        }
+
+        function switchTab(tab) {
+            document.getElementById('viewServices').style.display = (tab === 'services') ? 'block' : 'none';
+            document.getElementById('viewMeds').style.display = (tab === 'meds') ? 'block' : 'none';
+            document.getElementById('viewUsers').style.display = (tab === 'users') ? 'block' : 'none';
+            document.getElementById('viewInsurance').style.display = (tab === 'insurance') ? 'block' : 'none';
+            document.getElementById('viewMerge').style.display = (tab === 'merge') ? 'block' : 'none';
+
+            document.getElementById('tabBtnServices').classList.toggle('active', tab === 'services');
+            document.getElementById('tabBtnMeds').classList.toggle('active', tab === 'meds');
+            document.getElementById('tabBtnUsers').classList.toggle('active', tab === 'users');
+            document.getElementById('tabBtnInsurance').classList.toggle('active', tab === 'insurance');
+            document.getElementById('tabBtnMerge').classList.toggle('active', tab === 'merge');
+        }
+
+        // ========================================================
+        // 1. الفحوصات والخدمات والعمليات
+        // ========================================================
+        function onSrvCategoryChange() {
+            const cat = document.getElementById('srvCategory').value;
+            document.getElementById('boxConsultationConfig').style.display = (cat === 'عيادة الكشف') ? 'block' : 'none';
+            document.getElementById('boxInvestigationsConfig').style.display = (cat === 'وحدة الفحوصات') ? 'block' : 'none';
+            document.getElementById('boxLaserConfig').style.display = (cat === 'وحدة الليزر') ? 'block' : 'none';
+            document.getElementById('boxSurgeryConfig').style.display = (cat === 'وحدة العمليات') ? 'block' : 'none';
+            document.getElementById('boxEyeProceduresPricing').style.display = (cat === 'وحدة الفحوصات' || cat === 'وحدة الليزر') ? 'block' : 'none';
+
+            if (cat === 'عيادة الكشف') autoFillConsultationName();
+        }
+
+        function autoFillConsultationName() {
+            const spec = document.getElementById('srvClinicSpecialty').value;
+            const visit = document.getElementById('srvVisitType').value;
+            document.getElementById('srvConsultCustomName').value = `${visit} - ${spec}`;
+        }
+
+        document.getElementById('srvClinicSpecialty').addEventListener('change', autoFillConsultationName);
+
+        function onInvestigationSelect() {
+            const val = document.getElementById('srvInvestigationList').value;
+            document.getElementById('divCustomInvName').style.display = (val === 'CUSTOM') ? 'block' : 'none';
+        }
+
+        function onLaserSelect() {
+            const val = document.getElementById('srvLaserList').value;
+            document.getElementById('divCustomLaserName').style.display = (val === 'CUSTOM') ? 'block' : 'none';
+        }
+
+        function onSurgerySelect() {
+            const val = document.getElementById('srvSurgeryList').value;
+            document.getElementById('divCustomSurgeryName').style.display = (val === 'CUSTOM') ? 'block' : 'none';
+        }
+
+        function autoSuggestBothPrice() {
+            const single = parseFloat(document.getElementById('srvPriceSingle').value || 0);
+            const bothInput = document.getElementById('srvPriceBoth');
+            if (single > 0 && !bothInput.value) bothInput.value = single * 2;
+        }
+
+        function applyDoublePrice() {
+            const single = parseFloat(document.getElementById('srvPriceSingle').value || 0);
+            if (single > 0) document.getElementById('srvPriceBoth').value = single * 2;
+        }
+
+        function filterServices(category, btn) {
+            currentSrvFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderServicesTable();
+        }
+
+        async function loadServices() {
+            try {
+                const res = await fetch('/api/admin/services');
+                servicesData = await res.json();
+                renderServicesTable();
+            } catch (err) { }
+        }
+
+        function renderServicesTable() {
+            const tbody = document.getElementById('srvTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            let list = servicesData;
+            if (currentSrvFilter !== 'الكل') list = list.filter(s => s.category === currentSrvFilter);
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-muted py-4">${currentLanguage === 'ar' ? 'لا توجد خدمات مسجلة في هذا القسم.' : 'No services found.'}</td></tr>`;
+                return;
+            }
+            list.forEach(s => {
+                const isConsult = (s.category === 'عيادة الكشف');
+                const isSurgery = (s.category === 'وحدة العمليات');
+
+                let priceHtml = '';
+                let detailsHtml = '';
+
+                if (isConsult) {
+                    priceHtml = `<span class="fw-bold text-success fs-6">${s.price || 0} ${currentLanguage === 'ar' ? 'ج.م' : 'EGP'}</span>`;
+                    detailsHtml = `<span class="badge bg-light text-dark border">${currentLanguage === 'ar' ? 'استشارة' : 'Followup'}: ${s.followupPrice || 0} (${s.followupDays || 14} ${currentLanguage === 'ar' ? 'يوم' : 'Days'})</span>`;
+                } else if (isSurgery) {
+                    priceHtml = `<span class="fw-bold text-primary fs-6">${s.price || 0} ${currentLanguage === 'ar' ? 'ج.م' : 'EGP'}</span>`;
+                    detailsHtml = `<span class="badge bg-success">${currentLanguage === 'ar' ? 'عملية جراحية معتمدة' : 'Approved Surgery'}</span>`;
+                } else {
+                    const priceS = s.priceSingle || s.price || 0;
+                    const priceB = s.priceBoth || (priceS * 2);
+                    priceHtml = `<div class="d-flex justify-content-center gap-2"><span class="badge bg-info text-dark p-2">${currentLanguage === 'ar' ? 'عين' : 'Single'}: ${priceS}</span><span class="badge bg-warning text-dark p-2">${currentLanguage === 'ar' ? 'عينين' : 'Both'}: ${priceB}</span></div>`;
+                    detailsHtml = `<span class="badge bg-light text-secondary border">${s.category}</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="badge bg-secondary badge-dept">${s.category}</span></td>
+                        <td class="fw-bold text-dark text-start ps-3">${s.name}</td>
+                        <td>${priceHtml}</td>
+                        <td>${detailsHtml}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" onclick="editService(${s.id})">✏️ ${currentLanguage === 'ar' ? 'تعديل' : 'Edit'}</button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="deleteService(${s.id})">🗑️ ${currentLanguage === 'ar' ? 'حذف' : 'Delete'}</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        async function saveService(mode) {
+            const editId = parseInt(document.getElementById('srvEditId').value || '0');
+            const category = document.getElementById('srvCategory').value;
+            let name = "";
+            let price = 0;
+
+            if (category === 'عيادة الكشف') {
+                name = document.getElementById('srvConsultCustomName').value.trim();
+                price = parseFloat(document.getElementById('srvConsultPrice').value || 0);
+            } else if (category === 'وحدة الفحوصات') {
+                const invVal = document.getElementById('srvInvestigationList').value;
+                name = (invVal === 'CUSTOM') ? document.getElementById('srvCustomInvInput').value.trim() : invVal;
+            } else if (category === 'وحدة الليزر') {
+                const lsrVal = document.getElementById('srvLaserList').value;
+                name = (lsrVal === 'CUSTOM') ? document.getElementById('srvCustomLaserInput').value.trim() : lsrVal;
+            } else if (category === 'وحدة العمليات') {
+                const surgVal = document.getElementById('srvSurgeryList').value;
+                name = (surgVal === 'CUSTOM') ? document.getElementById('srvCustomSurgeryInput').value.trim() : surgVal;
+                price = parseFloat(document.getElementById('srvSurgeryPrice').value || 0);
+            }
+
+            if (!name) { alert('اسم الخدمة أو العملية مطلوب!'); return; }
+
+            const isUpdate = (mode === 'UPDATE' && editId > 0);
+            let payload = {
+                category, name, price,
+                priceSingle: parseFloat(document.getElementById('srvPriceSingle').value || 0),
+                priceBoth: parseFloat(document.getElementById('srvPriceBoth').value || 0),
+                followupPrice: parseFloat(document.getElementById('srvFollowupPrice').value || 0),
+                followupDays: parseInt(document.getElementById('srvFollowupDays').value || 14),
+                eyeSide: (category === 'وحدة العمليات') ? 'العين المقررة' : 'عام'
+            };
+
+            const url = isUpdate ? `/api/admin/services/${editId}` : '/api/admin/services';
+            const method = isUpdate ? 'PUT' : 'POST';
+
+            const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                alert('✅ تم الحفظ بنجاح في قاعدة البيانات');
+                resetSrvForm();
+                loadServices();
+            }
+        }
+
+        function editService(id) {
+    const s = servicesData.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('srvEditId').value = s.id;
+    document.getElementById('srvCategory').value = s.category;
+    onSrvCategoryChange();
+
+    if (s.category === 'عيادة الكشف') {
+        document.getElementById('srvConsultCustomName').value = s.name;
+        document.getElementById('srvConsultPrice').value = s.price || 0;
+        document.getElementById('srvFollowupPrice').value = s.followupPrice || 0;
+        document.getElementById('srvFollowupDays').value = s.followupDays || 14;
+    } else if (s.category === 'وحدة العمليات') {
+        document.getElementById('srvSurgeryPrice').value = s.price || 0;
+        document.getElementById('srvSurgeryList').value = s.name;
+    } else if (s.category === 'وحدة الفحوصات') {
+        document.getElementById('srvInvestigationList').value = s.name;
+        document.getElementById('srvPriceSingle').value = s.priceSingle || s.price || 0;
+        document.getElementById('srvPriceBoth').value = s.priceBoth || ((s.price || 0) * 2);
+    } else if (s.category === 'وحدة الليزر') {
+        document.getElementById('srvLaserList').value = s.name;
+        document.getElementById('srvPriceSingle').value = s.priceSingle || s.price || 0;
+        document.getElementById('srvPriceBoth').value = s.priceBoth || ((s.price || 0) * 2);
+    }
+
+    document.getElementById('srvFormTitle').innerText = `✏️ ${currentLanguage === 'ar' ? 'تعديل: ' : 'Edit: '} ${s.name}`;
+    document.getElementById('btnSaveNewSrv').style.display = 'none';
+    document.getElementById('btnUpdateSrv').style.display = 'inline-block';
+    document.getElementById('btnDeleteSrv').style.display = 'inline-block';
+}
+        function resetSrvForm() {
+            document.getElementById('srvEditId').value = '0';
+            document.getElementById('srvCategory').value = 'عيادة الكشف';
+            document.getElementById('srvConsultPrice').value = '300';
+            document.getElementById('srvSurgeryPrice').value = '6000';
+            document.getElementById('srvPriceSingle').value = '';
+            document.getElementById('srvPriceBoth').value = '';
+            document.getElementById('divCustomInvName').style.display = 'none';
+            document.getElementById('divCustomLaserName').style.display = 'none';
+            document.getElementById('divCustomSurgeryName').style.display = 'none';
+
+            onSrvCategoryChange();
+            autoFillConsultationName();
+
+            document.getElementById('srvFormTitle').innerText = currentLanguage === 'ar' ? '➕ تسعير خدمة / فحص جديد' : '➕ Price New Service';
+            document.getElementById('btnSaveNewSrv').style.display = 'inline-block';
+            document.getElementById('btnUpdateSrv').style.display = 'none';
+            document.getElementById('btnDeleteSrv').style.display = 'none';
+        }
+
+        async function deleteService(id) {
+            if (!confirm('حذف هذه الخدمة نهائياً من قاعدة البيانات؟')) return;
+            const res = await fetch(`/api/admin/services/${id}`, { method: 'DELETE' });
+            if (res.ok) { resetSrvForm(); loadServices(); }
+        }
+
+        // ========================================================
+        // 2. دوال الأدوية والقطرات
+        // ========================================================
+        async function loadMedications() {
+            try {
+                const res = await fetch('/api/admin/medications');
+                medsData = await res.json();
+                renderMedicationsTable();
+            } catch (e) { }
+        }
+
+        function renderMedicationsTable() {
+            const tbody = document.getElementById('medTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            medsData.forEach(m => {
+                const mId = m.id || m.medicationId;
+                tbody.innerHTML += `<tr><td class="fw-bold">${m.name}</td><td>${m.category||'-'}</td><td>${m.defaultDose||'-'}</td><td>${m.instructions||'-'}</td><td><button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" onclick="editMedication(${mId})">✏️ ${currentLanguage === 'ar' ? 'تعديل' : 'Edit'}</button><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="deleteMedication(${mId})">🗑️ ${currentLanguage === 'ar' ? 'حذف' : 'Delete'}</button></td></tr>`;
+            });
+        }
+
+        async function saveMedication(mode) {
+            const editId = parseInt(document.getElementById('medEditId').value || '0');
+            const name = document.getElementById('medTradeName').value.trim();
+            if (!name) { alert('اسم الدواء مطلوب!'); return; }
+            const payload = { name, category: document.getElementById('medCategory').value.trim(), defaultDose: document.getElementById('medDefaultDose').value.trim(), instructions: document.getElementById('medInstructions').value.trim() };
+            const isUpdate = (mode === 'UPDATE' && editId > 0);
+            let url = isUpdate ? `/api/admin/medications/${editId}` : '/api/admin/medications';
+            let method = isUpdate ? 'PUT' : 'POST';
+
+            let res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                alert('✅ تم حفظ الدواء بنجاح');
+                resetMedForm();
+                loadMedications();
+            }
+        }
+
+        function editMedication(id) {
+            const m = medsData.find(x => (x.id == id || x.medicationId == id));
+            if (!m) return;
+            document.getElementById('medEditId').value = m.id || m.medicationId;
+            document.getElementById('medTradeName').value = m.name;
+            document.getElementById('medCategory').value = m.category || '';
+            document.getElementById('medDefaultDose').value = m.defaultDose || '';
+            document.getElementById('medInstructions').value = m.instructions || '';
+            document.getElementById('btnSaveNewMed').style.display = 'none';
+            document.getElementById('btnUpdateMed').style.display = 'inline-block';
+            document.getElementById('btnDeleteMed').style.display = 'inline-block';
+        }
+
+        function resetMedForm() {
+            document.getElementById('medEditId').value = '0';
+            document.getElementById('medTradeName').value = '';
+            document.getElementById('medCategory').value = '';
+            document.getElementById('medDefaultDose').value = '';
+            document.getElementById('medInstructions').value = '';
+            document.getElementById('btnSaveNewMed').style.display = 'inline-block';
+            document.getElementById('btnUpdateMed').style.display = 'none';
+            document.getElementById('btnDeleteMed').style.display = 'none';
+        }
+
+        async function deleteMedication(id) {
+            if (!confirm('حذف هذا الدواء نهائياً؟')) return;
+            const res = await fetch(`/api/admin/medications/${id}`, { method: 'DELETE' });
+            if (res.ok) { resetMedForm(); loadMedications(); }
+        }
+
+        // ========================================================
+        // 3. دوال المستخدمين وتحديد الشاشات المصرح بها
+        // ========================================================
+        async function loadUsers() {
+            try {
+                const res = await fetch('/api/admin/users');
+                usersData = await res.json();
+                renderUsersTable();
+            } catch (e) { }
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('userTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            usersData.forEach(u => {
+                const uId = u.id || u.userId;
+                const screens = u.allowedScreens || 'all';
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">${u.username}</td>
+                        <td>${u.fullName}</td>
+                        <td><span class="badge bg-primary">${u.roleName}</span></td>
+                        <td>${u.doctorScope||'-'}</td>
+                        <td><small class="badge bg-light text-dark border">${screens}</small></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" onclick="editUser(${uId})">✏️ تعديل</button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="deleteUser(${uId})">🗑️ حذف</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function checkRoleDoctor() {
+            const role = document.getElementById('uRoleName').value.toLowerCase();
+            document.getElementById('doctorScopeBox').style.display = ['consultant','specialist','resident'].includes(role) ? 'block' : 'none';
+        }
+
+        async function saveUser(mode) {
+            const editId = parseInt(document.getElementById('userEditId').value || '0');
+            const username = document.getElementById('uUsername').value.trim();
+            const fullName = document.getElementById('uFullName').value.trim();
+            const password = document.getElementById('uPassword').value.trim();
+            if (!fullName || !username) { alert('الاسم واسم الدخول مطلوبان!'); return; }
+
+            // تجميع الشاشات المصرح بها
+            let allowedScreensList = [];
+            if (document.getElementById('chkScrReception').checked) allowedScreensList.push('reception');
+            if (document.getElementById('chkScrDoctor').checked) allowedScreensList.push('doctor');
+            if (document.getElementById('chkScrCall').checked) allowedScreensList.push('callcenter');
+            if (document.getElementById('chkScrDilation').checked) allowedScreensList.push('dilation');
+            if (document.getElementById('chkScrAdmin').checked) allowedScreensList.push('admin');
+            const allowedScreens = allowedScreensList.join(',');
+
+            const isUpdate = (mode === 'UPDATE' && editId > 0);
+            let payload = { 
+                username, fullName, 
+                roleName: document.getElementById('uRoleName').value, 
+                doctorScope: document.getElementById('uDoctorScope').value, 
+                title: document.getElementById('uTitle').value.trim(),
+                allowedScreens: allowedScreens
+            };
+            if (password) payload.password = password;
+
+            let url = isUpdate ? `/api/admin/users/${editId}` : '/api/admin/users';
+            let method = isUpdate ? 'PUT' : 'POST';
+
+            let res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                alert('✅ تم حفظ بيانات المستخدم والصلاحيات بنجاح');
+                resetUserForm();
+                loadUsers();
+            }
+        }
+
+        function editUser(id) {
+            const u = usersData.find(x => (x.id == id || x.userId == id));
+            if (!u) return;
+            document.getElementById('userEditId').value = u.id || u.userId;
+            document.getElementById('uUsername').value = u.username;
+            document.getElementById('uFullName').value = u.fullName;
+            document.getElementById('uRoleName').value = u.roleName;
+            document.getElementById('uDoctorScope').value = u.doctorScope || 'كشوفات وفحوصات';
+            document.getElementById('uTitle').value = u.title || '';
+            checkRoleDoctor();
+
+            // ضبط مربعات الشاشات المصرح بها
+            const screens = (u.allowedScreens || 'all').toLowerCase();
+            document.getElementById('chkScrReception').checked = (screens === 'all' || screens.includes('reception'));
+            document.getElementById('chkScrDoctor').checked = (screens === 'all' || screens.includes('doctor'));
+            document.getElementById('chkScrCall').checked = (screens === 'all' || screens.includes('callcenter'));
+            document.getElementById('chkScrDilation').checked = (screens === 'all' || screens.includes('dilation'));
+            document.getElementById('chkScrAdmin').checked = (screens === 'all' || screens.includes('admin'));
+
+            document.getElementById('btnSaveNewUser').style.display = 'none';
+            document.getElementById('btnUpdateUser').style.display = 'inline-block';
+            document.getElementById('btnDeleteUser').style.display = 'inline-block';
+        }
+
+        function resetUserForm() {
+            document.getElementById('userEditId').value = '0';
+            document.getElementById('uUsername').value = '';
+            document.getElementById('uFullName').value = '';
+            document.getElementById('uPassword').value = '';
+            document.getElementById('uTitle').value = '';
+            checkRoleDoctor();
+
+            document.getElementById('chkScrReception').checked = true;
+            document.getElementById('chkScrDoctor').checked = true;
+            document.getElementById('chkScrCall').checked = false;
+            document.getElementById('chkScrDilation').checked = false;
+            document.getElementById('chkScrAdmin').checked = false;
+
+            document.getElementById('btnSaveNewUser').style.display = 'inline-block';
+            document.getElementById('btnUpdateUser').style.display = 'none';
+            document.getElementById('btnDeleteUser').style.display = 'none';
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('حذف هذا المستخدم؟')) return;
+            const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+            if (res.ok) { resetUserForm(); loadUsers(); }
+        }
+
+        // ========================================================
+        // 4. شركات التأمين والتعاقدات
+        // ========================================================
+        async function loadInsurance() {
+            const tbody = document.getElementById('insTableBody');
+            try {
+                const res = await fetch('/api/admin/insurance');
+                insuranceData = await res.json();
+                renderInsuranceTable();
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-danger py-4">فشل قراءة جدول MasterInsurance</td></tr>';
+            }
+        }
+
+        function renderInsuranceTable() {
+            const tbody = document.getElementById('insTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            insuranceData.forEach(ins => {
+                const insId = ins.id || ins.Id;
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold text-dark text-start ps-3">${ins.nameAr || ins.NameAr}</td>
+                        <td class="text-muted">${ins.nameEn || ins.NameEn || '-'}</td>
+                        <td><span class="badge bg-success fs-6">${ins.defaultCopay || ins.DefaultCopay}</span></td>
+                        <td class="small text-muted">${ins.notes || ins.Notes || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" onclick="editInsurance(${insId})">✏️ تعديل</button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="deleteInsurance(${insId})">🗑️ حذف</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        async function saveInsurance(mode) {
+            const editId = parseInt(document.getElementById('insEditId').value || '0');
+            const nameAr = document.getElementById('insNameAr').value.trim();
+            const nameEn = document.getElementById('insNameEn').value.trim() || nameAr;
+            const defaultCopay = document.getElementById('insDefaultCopay').value.trim() || '10%';
+            const notes = document.getElementById('insNotes').value.trim();
+
+            if (!nameAr) { alert('اسم شركة التأمين مطلوب!'); return; }
+
+            const isUpdate = (mode === 'UPDATE' && editId > 0);
+            const payload = { nameAr, nameEn, defaultCopay, notes };
+            const url = isUpdate ? `/api/admin/insurance/${editId}` : '/api/admin/insurance';
+            const method = isUpdate ? 'PUT' : 'POST';
+
+            const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                alert('✅ تم حفظ شركة التأمين بنجاح');
+                resetInsForm();
+                loadInsurance();
+            }
+        }
+
+        function editInsurance(id) {
+            const ins = insuranceData.find(x => (x.id == id || x.Id == id));
+            if (!ins) return;
+            const realId = ins.id || ins.Id;
+            document.getElementById('insEditId').value = realId;
+            document.getElementById('insNameAr').value = ins.nameAr || ins.NameAr;
+            document.getElementById('insNameEn').value = ins.nameEn || ins.NameEn || '';
+            document.getElementById('insDefaultCopay').value = ins.defaultCopay || ins.DefaultCopay || '10%';
+            document.getElementById('insNotes').value = ins.notes || ins.Notes || '';
+
+            document.getElementById('insFormTitle').innerText = `✏️ تعديل: ${ins.nameAr || ins.NameAr}`;
+            document.getElementById('btnSaveNewIns').style.display = 'none';
+            document.getElementById('btnUpdateIns').style.display = 'inline-block';
+            document.getElementById('btnDeleteIns').style.display = 'inline-block';
+        }
+
+        function resetInsForm() {
+            document.getElementById('insEditId').value = '0';
+            document.getElementById('insNameAr').value = '';
+            document.getElementById('insNameEn').value = '';
+            document.getElementById('insDefaultCopay').value = '10%';
+            document.getElementById('insNotes').value = '';
+
+            document.getElementById('insFormTitle').innerText = '➕ إضافة جهة / شركة تأمين';
+            document.getElementById('btnSaveNewIns').style.display = 'inline-block';
+            document.getElementById('btnUpdateIns').style.display = 'none';
+            document.getElementById('btnDeleteIns').style.display = 'none';
+        }
+
+        async function deleteInsurance(id) {
+            if (!confirm('حذف شركة التأمين؟')) return;
+            const res = await fetch(`/api/admin/insurance/${id}`, { method: 'DELETE' });
+            if (res.ok) { resetInsForm(); loadInsurance(); }
+        }
+
+        // ========================================================
+        // 5. دمج ملفات المرضى المتكررة مع عرض الصور المقارنة
+        // ========================================================
+        async function previewPatientForMerge(type) {
+            const inputId = type === 'master' ? document.getElementById('txtMasterId').value : document.getElementById('txtDuplicateId').value;
+            const nameDiv = type === 'master' ? document.getElementById('previewMasterName') : document.getElementById('previewDuplicateName');
+            const detailsDiv = type === 'master' ? document.getElementById('previewMasterDetails') : document.getElementById('previewDuplicateDetails');
+            const imgEl = type === 'master' ? document.getElementById('imgMasterPhoto') : document.getElementById('imgDuplicatePhoto');
+            
+            if (!inputId || inputId <= 0) {
+                nameDiv.innerText = 'اسم المريض: --';
+                detailsDiv.innerText = 'الرقم القومي: -- | الهاتف: --';
+                imgEl.src = defaultAvatar;
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/reception/patient/' + inputId);
+                if (res.ok) {
+                    const data = await res.json();
+                    const p = data.patient;
+                    nameDiv.innerText = p.fullName || '--';
+                    detailsDiv.innerText = `بطاقة: ${p.nationalId || 'بدون'} | هاتف: ${p.mobile} | سن: ${p.age || '--'}`;
+                    imgEl.src = p.photoData ? p.photoData : defaultAvatar;
+                } else {
+                    nameDiv.innerText = '❌ مريض غير موجود!';
+                    detailsDiv.innerText = 'تأكد من كود الملف الصحيح';
+                    imgEl.src = defaultAvatar;
+                }
+            } catch {
+                nameDiv.innerText = '❌ خطأ بالاتصال';
+                imgEl.src = defaultAvatar;
+            }
+        }
+
+        async function executeMergePatients() {
+            const masterId = parseInt(document.getElementById('txtMasterId').value || '0');
+            const dupId = parseInt(document.getElementById('txtDuplicateId').value || '0');
+
+            if (masterId <= 0 || dupId <= 0) {
+                alert('يرجى تحديد كود الملف الأصلي وكود الملف المكرر!');
+                return;
+            }
+
+            if (masterId === dupId) {
+                alert('لا يمكن دمج الملف مع نفسه!');
+                return;
+            }
+
+            const confirmMerge = confirm(`⚠️ تأكيد أمني نهائي:\nهل أنت متأكد من دمج كل كشوفات وفحوصات وعمليات ومرفقات الملف (#${dupId}) ونقلها إلى الملف (#${masterId}) وأرشفة الملف المكرر؟`);
+            if (!confirmMerge) return;
+
+            try {
+                const res = await fetch('/api/admin/merge-patients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        masterPatientId: masterId,
+                        duplicatePatientId: dupId,
+                        adminUser: sessionStorage.getItem('fullName') || 'المشرف العام'
+                    })
+                });
+
+                // معالجة الاستجابة بأمان لمنع Unexpected end of JSON
+                const text = await res.text();
+                let data = {};
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    alert(`استجابة السيرفر:\n${text}`);
+                    return;
+                }
+
+                if (data.success) {
+                    alert(data.message);
+                    document.getElementById('txtMasterId').value = '';
+                    document.getElementById('txtDuplicateId').value = '';
+                    previewPatientForMerge('master');
+                    previewPatientForMerge('duplicate');
+                } else {
+                    alert('⚠️ تنبيه: ' + (data.message || 'فشلت العملية'));
+                }
+            } catch (err) {
+                alert('خطأ في الاتصال بالسيرفر: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز حبشي للعيون - إدارة وجداول الكول سنتر (Supervisor)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+        .top-navbar { background-color: #ffffff; border-bottom: 2px solid #e2e8f0; }
+        .card-custom { border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .day-checkbox-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; }
+        .begol-footer { margin-top: auto; background: #ffffff; border-top: 1px solid #e2e8f0; padding: 12px 20px; font-size: 0.85rem; color: #64748b; }
+        .andy-badge { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-navbar py-2 px-4 shadow-sm mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center">
+                <span class="fs-4 me-2 text-warning">🛡️</span>
+                <div>
+                    <h5 class="m-0 fw-bold text-dark">مركز حبشي التخصصي للعيون</h5>
+                    <small class="text-warning fw-bold" style="font-size: 0.75rem;">نظام بيجول (Begol) • إدارة وجداول الكول سنتر (Supervisor Panel)</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="/callcenter.html" class="btn btn-outline-info btn-sm fw-bold">📞 شاشة الكول سنتر</a>
+                <a href="/admin.html" class="btn btn-outline-danger btn-sm fw-bold">⚙️ لوحة الإدارة</a>
+                <span id="lblUserBadge" class="badge bg-light text-dark border p-2">👤 المشرف: ...</span>
+                <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logout()">خروج 🚪</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container px-4 flex-grow-1 mb-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="card card-custom bg-white">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="m-0 fw-bold">⚙️ لوحة تحكم مشرف الكول سنتر (تحديد أيام الأسبوع، فترات العمل، وتوزيع الحصص)</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form onsubmit="saveDoctorSchedule(event)">
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-primary">القسم / العيادة الرئيسية:*</label>
+                                    <select id="supDepartment" class="form-select fw-bold bg-light" onchange="checkExistingSchedule()">
+                                        <option value="عيادة الكشف">🏥 عيادات الكشف التخصصية</option>
+                                        <option value="وحدة الفحوصات">🔬 وحدة الفحوصات والأشعة</option>
+                                        <option value="وحدة الليزر">⚡ وحدة الليزر والعلاج الضوئي</option>
+                                        <option value="وحدة العمليات">🏥 العمليات الجراحية</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-primary">من تاريخ (البداية):*</label>
+                                    <input type="date" id="supStartDate" class="form-control fw-bold" onchange="checkExistingSchedule()">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-primary">إلى تاريخ (النهاية):*</label>
+                                    <input type="date" id="supEndDate" class="form-control fw-bold" onchange="checkExistingSchedule()">
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark">الطبيب المعالج / المسؤول:*</label>
+                                    <select id="supDoctorSelect" class="form-select fw-bold text-danger" onchange="checkExistingSchedule()" required>
+                                        <option value="">-- اختر الطبيب --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark">التخصص الدقيق للعيادة:*</label>
+                                    <select id="supSpecialty" class="form-select fw-bold">
+                                        <option value="عيادة العيون العامة">عيادة العيون العامة (General)</option>
+                                        <option value="الشبكية والجسم الزجاجي">الشبكية والجسم الزجاجي (Retina)</option>
+                                        <option value="القرنية وتصحيح الإبصار">القرنية وتصحيح الإبصار (Cornea & Refractive)</option>
+                                        <option value="المياه البيضاء وزراعة العدسات">المياه البيضاء وزراعة العدسات (Cataract)</option>
+                                        <option value="المياه الزرقاء والجلوكوما">المياه الزرقاء والجلوكوما (Glaucoma)</option>
+                                        <option value="تجميل العيون وحجاج العين">تجميل العيون وحجاج العين (Oculoplastics)</option>
+                                        <option value="عيون الأطفال والحول">عيون الأطفال والحول (Pediatric & Strabismus)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- تحديد أيام الأسبوع المتاحة -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-success">حدد أيام العمل الأسبوعية للدكتور:*</label>
+                                <div class="day-checkbox-box d-flex flex-wrap gap-3 justify-content-around">
+                                    <div class="form-check"><input class="form-check-input day-chk" type="checkbox" value="6" id="day6" checked><label class="form-check-label fw-bold" for="day6">السبت</label></div>
+                                    <div class="form-check"><input class="form-check-input day-chk" type="checkbox" value="0" id="day0"><label class="form-check-label fw-bold" for="day0">الأحد</label></div>
+                                    <div class="form-check"><input class="form-check-input day-chk" type="checkbox" value="1" id="day1" checked><label class="form-check-label fw-bold" for="day1">الإثنين</label></div>
+                                    <div class="form-check"><input class="form-check-input day-chk" type="checkbox" value="2" id="day2"><label class="form-check-label fw-bold" for="day2">الثلاثاء</label></div>
+                                    <div class="form-check"><input class="form-check-input day-chk" type="checkbox" value="3" id="day3" checked><label class="form-check-label fw-bold" for="day3">الأربعاء</label></div>
+                                    <div class="form-check"><input class="form-check-input day-chk" type="checkbox" value="4" id="day4"><label class="form-check-label fw-bold" for="day4">الخميس</label></div>
+                                    <div class="form-check"><input class="form-check-input day-chk" type="checkbox" value="5" id="day5"><label class="form-check-label fw-bold" for="day5">الجمعة</label></div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 p-3 bg-light rounded border">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-success">فترة التشغيل (من الساعة):*</label>
+                                    <input type="time" id="supStartTime" class="form-control fw-bold text-center" value="16:00">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-danger">فترة التشغيل (إلى الساعة):*</label>
+                                    <input type="time" id="supEndTime" class="form-control fw-bold text-center" value="22:00">
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+                            <h6 class="fw-bold text-success mb-3">📊 تحديد حصة وأعداد الحالات المسموح بحجزها (Quota Allocation):</h6>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <div class="p-3 border rounded bg-light">
+                                        <label class="form-label small fw-bold text-dark">عدد حالات الكشف الجديد:</label>
+                                        <input type="number" id="supMaxNew" class="form-control fw-bold text-center text-success fs-5" value="15">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 border rounded bg-light">
+                                        <label class="form-label small fw-bold text-dark">عدد حالات الاستشارة:</label>
+                                        <input type="number" id="supMaxFollowup" class="form-control fw-bold text-center text-primary fs-5" value="10">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 border rounded bg-light">
+                                        <label class="form-label small fw-bold text-dark">عدد حالات الفحوصات / الليزر:</label>
+                                        <input type="number" id="supMaxScans" class="form-control fw-bold text-center text-warning fs-5" value="20">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow">
+                                💾 توليد ونشر جدول أيام العمل ومواعيد التشغيل بالداتا بيز
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="begol-footer">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong class="text-dark">👁️ نظام بيجول (Begol Eye System)</strong>
+                <span class="mx-1">•</span>
+                <span>مركز حبشي التخصصي للعيون</span>
+                <span class="mx-1">•</span>
+                <span class="text-muted">جميع الحقوق محفوظة © 2026</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="me-2">تم التطوير والبرمجة بواسطة:</span>
+                <span class="andy-badge">آندي (Andy)</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        window.onload = function() {
+            document.getElementById('lblUserBadge').innerText = `👤 ${sessionStorage.getItem('fullName') || 'مشرف'} (Supervisor)`;
+            const today = new Date();
+            document.getElementById('supStartDate').valueAsDate = today;
+            
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            document.getElementById('supEndDate').valueAsDate = nextMonth;
+
+            loadDoctorsList();
+        };
+
+        function logout() { sessionStorage.clear(); window.location.href = '/index.html'; }
+
+        async function loadDoctorsList() {
+            try {
+                const res = await fetch('/api/admin/doctors');
+                const list = await res.json();
+                const sel = document.getElementById('supDoctorSelect');
+                sel.innerHTML = '<option value="">-- اختر الطبيب المسؤول --</option>';
+                list.forEach(d => {
+                    sel.innerHTML += `<option value="${d.name}">د. ${d.name} (${d.title})</option>`;
+                });
+            } catch { }
+        }
+
+        async function checkExistingSchedule() {
+            const doc = document.getElementById('supDoctorSelect').value;
+            const date = document.getElementById('supStartDate').value;
+            const dept = document.getElementById('supDepartment').value;
+            if (!doc || !date) return;
+
+            try {
+                const res = await fetch(`/api/supervisor/get-schedule?doctorName=${encodeURIComponent(doc)}&date=${encodeURIComponent(date)}&dept=${encodeURIComponent(dept)}`);
+                const data = await res.json();
+                if (data.exists) {
+                    document.getElementById('supSpecialty').value = data.specialty;
+                    document.getElementById('supMaxNew').value = data.maxNew;
+                    document.getElementById('supMaxFollowup').value = data.maxFollowup;
+                    document.getElementById('supMaxScans').value = data.maxScans;
+                    if (data.startTime) document.getElementById('supStartTime').value = data.startTime;
+                    if (data.endTime) document.getElementById('supEndTime').value = data.endTime;
+                }
+            } catch { }
+        }
+
+        async function saveDoctorSchedule(e) {
+            e.preventDefault();
+            const department = document.getElementById('supDepartment').value;
+            const specialty = document.getElementById('supSpecialty').value;
+            const doctorName = document.getElementById('supDoctorSelect').value;
+            const startDate = document.getElementById('supStartDate').value;
+            const endDate = document.getElementById('supEndDate').value;
+            const startTime = document.getElementById('supStartTime').value;
+            const endTime = document.getElementById('supEndTime').value;
+            
+            let daysOfWeek = [];
+            document.querySelectorAll('.day-chk:checked').forEach(chk => {
+                daysOfWeek.push(parseInt(chk.value));
+            });
+
+            const maxNewConsultations = parseInt(document.getElementById('supMaxNew').value || '15');
+            const maxFollowups = parseInt(document.getElementById('supMaxFollowup').value || '10');
+            const maxScansOrLaser = parseInt(document.getElementById('supMaxScans').value || '20');
+
+            if (!doctorName || !startDate || !endDate) {
+                alert('اختر الطبيب وتواريخ البداية والنهاية!');
+                return;
+            }
+
+            if (daysOfWeek.length === 0) {
+                alert('يرجى اختيار يوم واحد على الأقل من أيام الأسبوع!');
+                return;
+            }
+
+            const payload = { department, specialty, doctorName, startDate, endDate, daysOfWeek, startTime, endTime, maxNewConsultations, maxFollowups, maxScansOrLaser };
+
+            const res = await fetch('/api/supervisor/save-schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('✅ تم توليد وحفظ مواعيد الأيام المحددة بنجاح في الداتا بيز!');
+            } else {
+                alert('فشل حفظ الجدول');
+            }
+        }
+    </script>
+</body>
+</html>
